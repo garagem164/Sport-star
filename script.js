@@ -1,5 +1,5 @@
 // ============================================
-// ESTADO DO JOGO (VERSÃO COMPLETA)
+// ESTADO DO JOGO (IDLE VERSION)
 // ============================================
 let jogo = {
     dinheiro: 100,
@@ -7,12 +7,17 @@ let jogo = {
     trofeus: 0,
     nivel: 1,
     esporteAtual: "futebol",
+    partidasTotais: 0,
+    tempoJogado: 0, // em segundos
     estatisticas: {
         gols: 0,
         assistencias: 0,
         partidas: 0,
         vitorias: 0,
-        golsSofridos: 0
+        golsSofridos: 0,
+        torneiosVencidos: 0,
+        finalizacoes: 0,
+        cartoes: 0
     },
     inventario: {
         chuteira: false,
@@ -21,10 +26,10 @@ let jogo = {
         tecnico: false
     },
     time: {
-        atacante: { nivel: 1, habilidade: 0, custo: 8 },
-        meio: { nivel: 1, habilidade: 0, custo: 8 },
-        defensor: { nivel: 1, habilidade: 0, custo: 8 },
-        goleiro: { nivel: 1, habilidade: 0, custo: 8 }
+        atacante: { nivel: 1, habilidade: 0, custo: 8, nome: "Atacante" },
+        meio: { nivel: 1, habilidade: 0, custo: 8, nome: "Meio-campo" },
+        defensor: { nivel: 1, habilidade: 0, custo: 8, nome: "Defensor" },
+        goleiro: { nivel: 1, habilidade: 0, custo: 8, nome: "Goleiro" }
     },
     esportes: {
         futebol: { 
@@ -35,7 +40,8 @@ let jogo = {
             rivalNome: "Bot F.C.", 
             rivalHabilidade: 8, 
             desbloqueado: true,
-            rivalVitorias: 0
+            rivalVitorias: 0,
+            vitoriasConsecutivas: 0
         },
         basquete: { 
             nomeAtleta: "Cestinha de Basquete", 
@@ -45,18 +51,24 @@ let jogo = {
             rivalNome: "Robo Bulls", 
             rivalHabilidade: 18, 
             desbloqueado: false,
-            rivalVitorias: 0
+            rivalVitorias: 0,
+            vitoriasConsecutivas: 0
         }
-    }
+    },
+    ultimoResultado: null
 };
 
-let emPartida = false;
-let torneioAtivo = false;
-let loopPartida = null;
+// ============================================
+// CONFIGURAÇÕES
+// ============================================
+const CONFIG = {
+    intervaloPartida: 30000, // 30 segundos entre partidas
+    intervaloSimulacao: 2000, // 2 segundos entre lances
+    maxGolsPorPartida: 5,
+    tempoPartidaFutebol: 90, // minutos
+    tempoPartidaBasquete: 40 // minutos
+};
 
-// ============================================
-// CONFIGURAÇÕES DOS TORNEIOS
-// ============================================
 const torneios = {
     futebol: {
         amador: { premio: 50, trofeus: 1, partidas: 3, nivelMin: 5, nome: "Amador" },
@@ -70,9 +82,6 @@ const torneios = {
     }
 };
 
-// ============================================
-// ITENS DA LOJA
-// ============================================
 const itensLoja = {
     chuteira: { nome: "Chuteira Pro", bonus: 5, custo: 150, icone: "👟" },
     bola: { nome: "Bola Oficial", bonus: 3, custo: 200, icone: "⚽" },
@@ -81,29 +90,451 @@ const itensLoja = {
 };
 
 // ============================================
-// LOOP PASSIVO (DINHEIRO)
+// VARIÁVEIS DE CONTROLE
 // ============================================
+let emPartida = false;
+let torneioAtivo = false;
+let simuladorAtivo = false;
+let loopSimulador = null;
+let intervaloTorneio = null;
+let partidaEmAndamento = null;
+let ultimaPartida = null;
+
+// ============================================
+// LOOP PRINCIPAL (IDLE)
+// ============================================
+
+// Loop de dinheiro passivo
 setInterval(() => {
-    if (!emPartida && !torneioAtivo) {
-        jogo.dinheiro += jogo.dinheiroPorSegundo;
-    }
+    jogo.dinheiro += jogo.dinheiroPorSegundo;
+    jogo.tempoJogado += 1;
     atualizarInterface();
 }, 1000);
 
+// Loop de partidas automáticas (IDLE)
+setInterval(() => {
+    if (!emPartida && !torneioAtivo) {
+        executarPartidaAutomatica();
+    }
+}, CONFIG.intervaloPartida);
+
 // ============================================
-// FUNÇÕES PRINCIPAIS
+// SISTEMA DE PARTIDAS AUTOMÁTICAS (IDLE)
 // ============================================
 
-// Selecionar Esporte
+function executarPartidaAutomatica() {
+    const esp = jogo.esportes[jogo.esporteAtual];
+    
+    // Calcula habilidade total
+    const habilidadeTotal = getHabilidadeTotal();
+    
+    // Simula resultado
+    const resultado = simularPartida(habilidadeTotal, esp.rivalHabilidade);
+    
+    // Aplica resultado
+    aplicarResultadoPartida(resultado, esp);
+    
+    // Atualiza interface se estiver na aba de partidas
+    if (!document.getElementById('aba-partidas').classList.contains('oculta')) {
+        atualizarSimulador(resultado);
+    }
+    
+    atualizarInterface();
+}
+
+function simularPartida(habilidadeJogador, habilidadeRival) {
+    // Fator sorte
+    const sorte = Math.random() * 20;
+    const forcaJogador = habilidadeJogador + sorte;
+    const forcaRival = habilidadeRival + (Math.random() * 15);
+    
+    // Gols baseados na força
+    const golsJogador = Math.floor((forcaJogador / 15) * (Math.random() * 3 + 1));
+    const golsRival = Math.floor((forcaRival / 15) * (Math.random() * 3 + 1));
+    
+    // Limita gols
+    const maxGols = CONFIG.maxGolsPorPartida;
+    const golsJ = Math.min(golsJogador, maxGols);
+    const golsR = Math.min(golsRival, maxGols);
+    
+    // Determina resultado
+    let resultado;
+    if (golsJ > golsR) resultado = 'vitoria';
+    else if (golsJ < golsR) resultado = 'derrota';
+    else resultado = 'empate';
+    
+    return {
+        resultado: resultado,
+        golsJogador: golsJ,
+        golsRival: golsR,
+        finalizacoes: Math.floor(habilidadeJogador / 5) + Math.floor(Math.random() * 5),
+        cartoes: Math.floor(Math.random() * 3)
+    };
+}
+
+function aplicarResultadoPartida(resultado, esp) {
+    jogo.partidasTotais++;
+    jogo.estatisticas.partidas++;
+    jogo.estatisticas.gols += resultado.golsJogador;
+    jogo.estatisticas.golsSofridos += resultado.golsRival;
+    jogo.estatisticas.finalizacoes += resultado.finalizacoes || 0;
+    jogo.estatisticas.cartoes += resultado.cartoes || 0;
+    
+    // Bônus aleatório de assistências
+    if (resultado.golsJogador > 0) {
+        jogo.estatisticas.assistencias += Math.floor(Math.random() * resultado.golsJogador) + 1;
+    }
+    
+    if (resultado.resultado === 'vitoria') {
+        jogo.estatisticas.vitorias++;
+        esp.vitoriasConsecutivas++;
+        esp.rivalVitorias = 0;
+        
+        // Ganhos
+        const premio = (jogo.esporteAtual === "basquete") ? 200 : 50;
+        const bonus = Math.floor(esp.vitoriasConsecutivas * 5);
+        jogo.dinheiro += premio + bonus;
+        jogo.trofeus += 1;
+        
+        // Evolui rival se tiver muitas vitórias consecutivas
+        if (esp.vitoriasConsecutivas >= 5) {
+            esp.rivalHabilidade += 5;
+            esp.rivalNome = `${esp.rivalNome} ⭐`;
+            esp.vitoriasConsecutivas = 0;
+        }
+        
+        // Ganho de experiência
+        const xp = Math.floor(resultado.golsJogador * 2);
+        esp.habilidade += Math.floor(xp / 3);
+        jogo.nivel = Math.max(jogo.nivel, esp.nivel);
+        
+    } else if (resultado.resultado === 'derrota') {
+        esp.rivalVitorias++;
+        esp.vitoriasConsecutivas = 0;
+        
+        // Rival evolui se ganhar muitas vezes
+        if (esp.rivalVitorias >= 3) {
+            esp.rivalHabilidade += 3;
+            esp.rivalNome = `${esp.rivalNome} 🔥`;
+            esp.rivalVitorias = 0;
+        }
+    } else {
+        // Empate
+        esp.vitoriasConsecutivas = 0;
+    }
+    
+    jogo.ultimoResultado = resultado;
+    ultimaPartida = resultado;
+}
+
+// ============================================
+// CÁLCULO DE HABILIDADE TOTAL
+// ============================================
+
+function getHabilidadeTotal() {
+    const esp = jogo.esportes[jogo.esporteAtual];
+    let total = esp.habilidade;
+    
+    // Bônus de itens
+    if (jogo.inventario.chuteira) total += 5;
+    if (jogo.inventario.bola) total += 3;
+    if (jogo.inventario.uniforme) total += 7;
+    if (jogo.inventario.tecnico) total += 10;
+    
+    // Bônus das posições
+    for (let pos in jogo.time) {
+        total += jogo.time[pos].habilidade * 0.2;
+    }
+    
+    return Math.floor(total);
+}
+
+// ============================================
+// SIMULADOR VISUAL (ASSISTIR PARTIDA)
+// ============================================
+
+function alternarSimulador() {
+    const container = document.getElementById('simulador-container');
+    const btn = document.getElementById('btn-simulador');
+    
+    if (simuladorAtivo) {
+        // Desliga simulador
+        simuladorAtivo = false;
+        container.classList.add('oculta');
+        btn.innerText = '▶️ Assistir Partida';
+        if (loopSimulador) {
+            clearInterval(loopSimulador);
+            loopSimulador = null;
+        }
+    } else {
+        // Liga simulador
+        simuladorAtivo = true;
+        container.classList.remove('oculta');
+        btn.innerText = '⏹️ Parar de Assistir';
+        iniciarSimuladorVisual();
+    }
+}
+
+function iniciarSimuladorVisual() {
+    if (loopSimulador) clearInterval(loopSimulador);
+    
+    // Cria o campo
+    criarCampo();
+    
+    // Inicia o loop de simulação visual
+    loopSimulador = setInterval(() => {
+        if (!emPartida) {
+            // Busca última partida ou simula uma
+            if (ultimaPartida) {
+                atualizarSimulador(ultimaPartida);
+                ultimaPartida = null;
+            } else {
+                // Simula um lance para visualização
+                simularLanceVisual();
+            }
+        }
+    }, CONFIG.intervaloSimulacao);
+}
+
+function criarCampo() {
+    const campo = document.getElementById('campo-jogo');
+    campo.innerHTML = '';
+    campo.className = '';
+    campo.classList.add(`campo-${jogo.esporteAtual}`);
+    
+    // Cria jogadores do time (azul)
+    const posicoes = [
+        { x: 15, y: 30, nome: 'AT' },
+        { x: 15, y: 50, nome: 'MC' },
+        { x: 15, y: 70, nome: 'DF' },
+        { x: 8, y: 50, nome: 'GL' }
+    ];
+    
+    posicoes.forEach((pos, i) => {
+        const jogador = document.createElement('div');
+        jogador.className = `jogador-campo jogador-time${i === 3 ? ' jogador-goleiro' : ''}`;
+        jogador.id = `jogador-time-${i}`;
+        jogador.style.left = `${pos.x}%`;
+        jogador.style.top = `${pos.y}%`;
+        jogador.textContent = pos.nome;
+        campo.appendChild(jogador);
+    });
+    
+    // Cria jogadores do rival (vermelho)
+    const posicoesRival = [
+        { x: 85, y: 30, nome: 'AT' },
+        { x: 85, y: 50, nome: 'MC' },
+        { x: 85, y: 70, nome: 'DF' },
+        { x: 92, y: 50, nome: 'GL' }
+    ];
+    
+    posicoesRival.forEach((pos, i) => {
+        const jogador = document.createElement('div');
+        jogador.className = `jogador-campo jogador-rival${i === 3 ? ' jogador-goleiro' : ''}`;
+        jogador.id = `jogador-rival-${i}`;
+        jogador.style.left = `${pos.x}%`;
+        jogador.style.top = `${pos.y}%`;
+        jogador.textContent = pos.nome;
+        campo.appendChild(jogador);
+    });
+    
+    // Cria bola
+    const bola = document.createElement('div');
+    bola.className = `bola-campo${jogo.esporteAtual === 'basquete' ? ' bola-basquete' : ''}`;
+    bola.id = 'bola-campo';
+    bola.style.left = '48%';
+    bola.style.top = '48%';
+    campo.appendChild(bola);
+}
+
+function simularLanceVisual() {
+    const esp = jogo.esportes[jogo.esporteAtual];
+    const habilidadeTotal = getHabilidadeTotal();
+    
+    // Movimentação aleatória dos jogadores
+    const jogadores = document.querySelectorAll('.jogador-campo');
+    jogadores.forEach(jogador => {
+        const x = Math.floor(Math.random() * 70) + 10;
+        const y = Math.floor(Math.random() * 70) + 10;
+        jogador.style.left = `${x}%`;
+        jogador.style.top = `${y}%`;
+    });
+    
+    // Movimento da bola
+    const bola = document.getElementById('bola-campo');
+    const chance = Math.random() * 100;
+    const forcaJogador = habilidadeTotal + (Math.random() * 10);
+    const forcaRival = esp.rivalHabilidade + (Math.random() * 10);
+    
+    let lanceTexto = '';
+    let posBolaX = 48;
+    let posBolaY = 48;
+    
+    if (forcaJogador > forcaRival + 5) {
+        // Ataque do time
+        posBolaX = Math.floor(Math.random() * 30) + 70;
+        posBolaY = Math.floor(Math.random() * 60) + 20;
+        lanceTexto = '⚡ Seu time ataca com perigo!';
+        if (Math.random() > 0.7) {
+            lanceTexto = '⚽ GOL DO SEU TIME!';
+            const gols = document.getElementById('gols-jogador');
+            gols.textContent = parseInt(gols.textContent) + 1;
+        }
+    } else if (forcaRival > forcaJogador + 5) {
+        // Ataque do rival
+        posBolaX = Math.floor(Math.random() * 30) + 5;
+        posBolaY = Math.floor(Math.random() * 60) + 20;
+        lanceTexto = '🔥 Rival pressiona!';
+        if (Math.random() > 0.7) {
+            lanceTexto = '⚽ GOL DO RIVAL!';
+            const gols = document.getElementById('gols-rival');
+            gols.textContent = parseInt(gols.textContent) + 1;
+        }
+    } else {
+        // Disputa
+        posBolaX = Math.floor(Math.random() * 40) + 30;
+        posBolaY = Math.floor(Math.random() * 60) + 20;
+        lanceTexto = '⚔️ Disputa acirrada no meio!';
+    }
+    
+    if (bola) {
+        bola.style.left = `${posBolaX}%`;
+        bola.style.top = `${posBolaY}%`;
+    }
+    
+    document.getElementById('lance-atual').innerText = lanceTexto;
+    
+    // Atualiza posse de bola
+    const posse = Math.floor(50 + (forcaJogador - forcaRival) / 2);
+    document.getElementById('posse-bola').innerText = `${Math.min(Math.max(posse, 20), 80)}%`;
+    
+    // Atualiza tempo
+    const tempo = document.getElementById('tempo-jogo');
+    const partes = tempo.textContent.split(':');
+    let minutos = parseInt(partes[0]);
+    let segundos = parseInt(partes[1]) + 1;
+    if (segundos >= 60) {
+        segundos = 0;
+        minutos++;
+    }
+    tempo.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+}
+
+function atualizarSimulador(resultado) {
+    document.getElementById('gols-jogador').textContent = resultado.golsJogador || 0;
+    document.getElementById('gols-rival').textContent = resultado.golsRival || 0;
+    document.getElementById('finalizacoes').textContent = resultado.finalizacoes || 0;
+    document.getElementById('cartoes').textContent = resultado.cartoes || 0;
+    
+    const esp = jogo.esportes[jogo.esporteAtual];
+    document.getElementById('nome-rival-placar').textContent = esp.rivalNome;
+    
+    // Atualiza mensagem final
+    const msg = document.getElementById('lance-atual');
+    if (resultado.resultado === 'vitoria') {
+        msg.innerText = '🏆 VITÓRIA! Seu time arrasou!';
+        msg.style.color = '#00b37e';
+    } else if (resultado.resultado === 'derrota') {
+        msg.innerText = '💔 Derrota! O rival foi melhor hoje.';
+        msg.style.color = '#f75a68';
+    } else {
+        msg.innerText = '🤝 Empate! Foi uma partida equilibrada.';
+        msg.style.color = '#e1b12c';
+    }
+}
+
+// ============================================
+// TORNEIOS
+// ============================================
+
+function iniciarTorneio(nivel) {
+    if (torneioAtivo || emPartida) {
+        alert('❌ Já há um torneio em andamento!');
+        return;
+    }
+    
+    const esp = jogo.esportes[jogo.esporteAtual];
+    const config = torneios[jogo.esporteAtual][nivel];
+    
+    if (!config) {
+        alert('❌ Nível de torneio inválido!');
+        return;
+    }
+    
+    if (esp.habilidade < config.nivelMin) {
+        alert(`❌ Habilidade mínima: ${config.nivelMin}\nSua habilidade: ${esp.habilidade}`);
+        return;
+    }
+    
+    torneioAtivo = true;
+    let vitorias = 0;
+    let partidasJogadas = 0;
+    let totalGols = 0;
+    
+    alert(`🏅 Torneio ${config.nome} iniciado! ${config.partidas} partidas.`);
+    
+    intervaloTorneio = setInterval(() => {
+        if (partidasJogadas >= config.partidas) {
+            clearInterval(intervaloTorneio);
+            finalizarTorneio(vitorias, config);
+            return;
+        }
+        
+        // Simula partida do torneio
+        const habilidadeTotal = getHabilidadeTotal();
+        const resultado = simularPartida(habilidadeTotal, esp.rivalHabilidade + (partidasJogadas * 2));
+        
+        if (resultado.resultado === 'vitoria') {
+            vitorias++;
+            totalGols += resultado.golsJogador;
+        }
+        
+        partidasJogadas++;
+        atualizarInterface();
+        
+        document.getElementById('lance-atual').innerText = 
+            `🏟️ Torneio: ${partidasJogadas}/${config.partidas} | Vitórias: ${vitorias}`;
+            
+    }, 3000);
+}
+
+function finalizarTorneio(vitorias, config) {
+    torneioAtivo = false;
+    
+    const premio = vitorias >= config.partidas / 2 ? config.premio + (vitorias * 10) : 0;
+    const trofeus = vitorias === config.partidas ? config.trofeus : Math.floor(vitorias / 2);
+    
+    jogo.dinheiro += premio;
+    jogo.trofeus += trofeus;
+    jogo.estatisticas.partidas += config.partidas;
+    jogo.estatisticas.vitorias += vitorias;
+    
+    if (vitorias === config.partidas) {
+        jogo.estatisticas.torneiosVencidos++;
+    }
+    
+    let mensagem = `🏆 TORNEIO FINALIZADO!\n`;
+    mensagem += `📊 Vitórias: ${vitorias}/${config.partidas}\n`;
+    mensagem += `💰 Prêmio: $${premio}\n`;
+    mensagem += `🏅 Troféus: ${trofeus}`;
+    
+    alert(mensagem);
+    atualizarInterface();
+}
+
+// ============================================
+// FUNÇÕES DE TREINO
+// ============================================
+
 function selecionarEsporte(esporte) {
     if (emPartida || torneioAtivo) return;
     
-    if (esporte === "basquete" && !jogo.esportes.basquete.desbloqueado) {
+    if (esporte === 'basquete' && !jogo.esportes.basquete.desbloqueado) {
         if (jogo.trofeus >= 5) {
             jogo.esportes.basquete.desbloqueado = true;
-            alert("🏀 Parabéns! Você desbloqueou a Franquia de Basquete!");
+            alert('🏀 Basquete desbloqueado!');
         } else {
-            alert("❌ Você precisa de pelo menos 5 Troféus para desbloquear o Basquete!");
+            alert('❌ Precisa de 5 troféus para desbloquear o Basquete!');
             return;
         }
     }
@@ -111,25 +542,23 @@ function selecionarEsporte(esporte) {
     atualizarInterface();
 }
 
-// Treinar Atleta Principal
 function treinarAtleta() {
     if (emPartida || torneioAtivo) return;
     
-    let esp = jogo.esportes[jogo.esporteAtual];
+    const esp = jogo.esportes[jogo.esporteAtual];
     if (jogo.dinheiro >= esp.custoTreino) {
         jogo.dinheiro -= esp.custoTreino;
         esp.nivel++;
         esp.habilidade += 3;
-        jogo.dinheiroPorSegundo += (jogo.esporteAtual === "basquete") ? 3 : 1;
+        jogo.dinheiroPorSegundo += (jogo.esporteAtual === 'basquete') ? 3 : 1;
         esp.custoTreino = Math.floor(esp.custoTreino * 1.6);
         jogo.nivel = Math.max(jogo.nivel, esp.nivel);
         atualizarInterface();
     } else {
-        alert("💰 Grana curta! Ganhe mais dinheiro jogando partidas.");
+        alert('💰 Dinheiro insuficiente!');
     }
 }
 
-// Treinar Posição Específica
 function treinarPosicao(posicao) {
     if (emPartida || torneioAtivo) return;
     
@@ -141,291 +570,19 @@ function treinarPosicao(posicao) {
         jogador.custo = Math.floor(jogador.custo * 1.5);
         atualizarInterface();
     } else {
-        alert("💰 Dinheiro insuficiente para treinar esta posição!");
+        alert('💰 Dinheiro insuficiente!');
     }
 }
 
 // ============================================
-// SISTEMA DE PARTIDAS (SIMULADOR AO VIVO)
-// ============================================
-
-function jogarPartida() {
-    if (emPartida || torneioAtivo) return;
-    emPartida = true;
-
-    document.getElementById("btn-jogar").disabled = true;
-    document.getElementById("simulador-ao-vivo").classList.remove("oculta");
-    document.getElementById("resultado-partida").innerText = "";
-    
-    let esp = jogo.esportes[jogo.esporteAtual];
-    document.getElementById("nome-rival-placar").innerText = esp.rivalNome;
-
-    let golsJogador = 0;
-    let golsRival = 0;
-    let tempo = 0;
-    let maxTempo = (jogo.esporteAtual === "futebol") ? 90 : 40;
-    let passoTempo = Math.floor(maxTempo / 6);
-    let lances = 0;
-
-    let pAzul = document.getElementById("player-azul");
-    let pVermelho = document.getElementById("player-vermelho");
-    let bola = document.getElementById("bola-jogo");
-    let golEfeito = document.getElementById("gol-efeito");
-
-    // Habilidade total do time (inclui itens e posições)
-    function getHabilidadeTotal() {
-        let base = esp.habilidade;
-        // Bônus de itens
-        if (jogo.inventario.chuteira) base += 5;
-        if (jogo.inventario.bola) base += 3;
-        if (jogo.inventario.uniforme) base += 7;
-        if (jogo.inventario.tecnico) base += 10;
-        // Bônus das posições
-        for (let pos in jogo.time) {
-            base += jogo.time[pos].habilidade * 0.2;
-        }
-        return Math.floor(base);
-    }
-
-    let habilidadeTotal = getHabilidadeTotal();
-
-    if (loopPartida) clearInterval(loopPartida);
-    
-    loopPartida = setInterval(() => {
-        tempo += passoTempo;
-        if (tempo > maxTempo) tempo = maxTempo;
-        document.getElementById("tempo-jogo").innerText = `${tempo}'`;
-        lances++;
-
-        // Movimentação dos jogadores
-        let posXAzul = Math.floor(Math.random() * 40) + 10;
-        let posYAzul = Math.floor(Math.random() * 120) + 40;
-        let posXVermelho = Math.floor(Math.random() * 40) + 50;
-        let posYVermelho = Math.floor(Math.random() * 120) + 40;
-
-        pAzul.style.left = `${posXAzul}%`;
-        pAzul.style.top = `${posYAzul}px`;
-        pVermelho.style.left = `${posXVermelho}%`;
-        pVermelho.style.top = `${posYVermelho}px`;
-
-        // Cálculo do lance
-        let chanceJogador = habilidadeTotal + Math.floor(Math.random() * 15);
-        let chanceRival = esp.rivalHabilidade + Math.floor(Math.random() * 15);
-
-        let lanceTexto = "";
-        let golMarcado = false;
-
-        if (chanceJogador > chanceRival + 3) {
-            // Seu time ataca
-            bola.style.left = "90%";
-            bola.style.top = `${posYVermelho}px`;
-            let pontos = (jogo.esporteAtual === "basquete") ? 2 : 1;
-            golsJogador += pontos;
-            lanceTexto = "⚡ Grande jogada do seu time... GOL!!";
-            golMarcado = true;
-            jogo.estatisticas.gols += pontos;
-        } else if (chanceRival > chanceJogador + 3) {
-            // Rival ataca
-            bola.style.left = "5%";
-            bola.style.top = `${posYAzul}px`;
-            let pontos = (jogo.esporteAtual === "basquete") ? 2 : 1;
-            golsRival += pontos;
-            lanceTexto = "😰 O rival pressionou e marcou!";
-            jogo.estatisticas.golsSofridos += pontos;
-        } else {
-            // Disputa no meio
-            bola.style.left = "48%";
-            bola.style.top = "85px";
-            lanceTexto = "⚔️ Disputa intensa pela posse de bola!";
-        }
-
-        // Efeito visual de gol
-        if (golMarcado) {
-            golEfeito.classList.remove("oculta");
-            setTimeout(() => {
-                golEfeito.classList.add("oculta");
-            }, 1000);
-        }
-
-        document.getElementById("lance-atual").innerText = lanceTexto;
-        document.getElementById("gols-jogador").innerText = golsJogador;
-        document.getElementById("gols-rival").innerText = golsRival;
-
-        // Fim da partida
-        if (tempo >= maxTempo || lances >= 10) {
-            clearInterval(loopPartida);
-            loopPartida = null;
-            finalizarPartida(golsJogador, golsRival, habilidadeTotal);
-        }
-    }, 1200);
-}
-
-function finalizarPartida(golsJogador, golsRival, habilidadeTotal) {
-    let esp = jogo.esportes[jogo.esporteAtual];
-    let output = document.getElementById("resultado-partida");
-    jogo.estatisticas.partidas++;
-    
-    if (golsJogador > golsRival) {
-        jogo.trofeus += 1;
-        let premio = (jogo.esporteAtual === "basquete") ? 200 : 50;
-        jogo.dinheiro += premio;
-        jogo.estatisticas.vitorias++;
-        esp.rivalVitorias = 0;
-        output.style.color = "#00b37e";
-        output.innerText = `🏆 VITÓRIA! Você faturou $${premio} e +1 🏆!`;
-        esp.rivalHabilidade += 3;
-        
-        // Bônus de experiência
-        let xpBonus = Math.floor(golsJogador * 2);
-        esp.habilidade += Math.floor(xpBonus / 5);
-        
-    } else if (golsJogador < golsRival) {
-        esp.rivalVitorias++;
-        output.style.color = "#f75a68";
-        output.innerText = "💔 Derrota! Treine mais seu atleta para superar o rival.";
-        
-        // Rival fica mais forte se vencer
-        if (esp.rivalVitorias >= 3) {
-            esp.rivalHabilidade += 5;
-            esp.rivalNome = `${esp.rivalNome} (⭐ Evoluído)`;
-            esp.rivalVitorias = 0;
-            output.innerText += " ⚠️ O rival evoluiu!";
-        }
-    } else {
-        output.style.color = "#e1b12c";
-        output.innerText = "🤝 Empate dramático! Nenhum troféu foi distribuído.";
-    }
-
-    // Atualiza habilidade total e nível
-    let habilidadeFinal = habilidadeTotal + Math.floor(golsJogador * 0.5);
-    esp.habilidade = Math.max(esp.habilidade, Math.floor(habilidadeFinal * 0.8));
-    jogo.nivel = Math.max(jogo.nivel, esp.nivel);
-
-    emPartida = false;
-    document.getElementById("btn-jogar").disabled = false;
-    atualizarInterface();
-}
-
-// ============================================
-// SISTEMA DE TORNEIOS
-// ============================================
-
-function iniciarTorneio(nivel) {
-    if (torneioAtivo || emPartida) {
-        alert("❌ Já há uma partida ou torneio em andamento!");
-        return;
-    }
-    
-    const esp = jogo.esportes[jogo.esporteAtual];
-    const config = torneios[jogo.esporteAtual][nivel];
-    
-    if (!config) {
-        alert("❌ Nível de torneio inválido!");
-        return;
-    }
-    
-    if (esp.habilidade < config.nivelMin) {
-        alert(`❌ Habilidade mínima para ${config.nome}: ${config.nivelMin}\nSua habilidade atual: ${esp.habilidade}`);
-        return;
-    }
-    
-    torneioAtivo = true;
-    document.getElementById("btn-jogar").disabled = true;
-    
-    let vitorias = 0;
-    let partidasJogadas = 0;
-    let totalGols = 0;
-    
-    alert(`🏅 Torneio ${config.nome} iniciado!\nSerão ${config.partidas} partidas. Boa sorte!`);
-    
-    const intervalo = setInterval(() => {
-        if (partidasJogadas >= config.partidas) {
-            clearInterval(intervalo);
-            finalizarTorneio(vitorias, config, totalGols);
-            return;
-        }
-        
-        // Simula cada partida
-        const resultado = simularPartidaTorneio();
-        if (resultado === 'vitoria') {
-            vitorias++;
-            totalGols += Math.floor(Math.random() * 3) + 1;
-        } else if (resultado === 'empate') {
-            totalGols += Math.floor(Math.random() * 2);
-        }
-        partidasJogadas++;
-        
-        atualizarInterface();
-        document.getElementById("lance-atual").innerText = 
-            `🏟️ Torneio: ${partidasJogadas}/${config.partidas} - Vitórias: ${vitorias}`;
-            
-    }, 1500);
-}
-
-function simularPartidaTorneio() {
-    const esp = jogo.esportes[jogo.esporteAtual];
-    const habilidadeTotal = esp.habilidade + (jogo.trofeus * 0.5);
-    
-    // Bônus de itens no torneio
-    let bonus = 0;
-    if (jogo.inventario.chuteira) bonus += 5;
-    if (jogo.inventario.bola) bonus += 3;
-    if (jogo.inventario.uniforme) bonus += 7;
-    if (jogo.inventario.tecnico) bonus += 10;
-    
-    const chance = Math.random() * 100;
-    const forcaTotal = habilidadeTotal + bonus;
-    
-    if (chance < forcaTotal * 0.8) {
-        return 'vitoria';
-    } else if (chance < forcaTotal * 0.8 + 15) {
-        return 'empate';
-    } else {
-        return 'derrota';
-    }
-}
-
-function finalizarTorneio(vitorias, config, totalGols) {
-    torneioAtivo = false;
-    document.getElementById("btn-jogar").disabled = false;
-    
-    const premio = vitorias >= config.partidas / 2 ? config.premio + (vitorias * 10) : 0;
-    const trofeus = vitorias === config.partidas ? config.trofeus : Math.floor(vitorias / 2);
-    
-    jogo.dinheiro += premio;
-    jogo.trofeus += trofeus;
-    jogo.estatisticas.vitorias += vitorias;
-    jogo.estatisticas.partidas += config.partidas;
-    jogo.estatisticas.gols += totalGols;
-    
-    let mensagem = `🏆 TORNEIO FINALIZADO!\n`;
-    mensagem += `📊 Vitórias: ${vitorias}/${config.partidas}\n`;
-    mensagem += `💰 Prêmio: $${premio}\n`;
-    mensagem += `🏅 Troféus: ${trofeus}\n`;
-    mensagem += `⚽ Gols: ${totalGols}`;
-    
-    alert(mensagem);
-    
-    // Bônus de experiência
-    if (vitorias >= config.partidas / 2) {
-        const esp = jogo.esportes[jogo.esporteAtual];
-        esp.habilidade += Math.floor(vitorias * 0.5);
-        jogo.nivel = Math.max(jogo.nivel, esp.nivel);
-    }
-    
-    document.getElementById("lance-atual").innerText = "🏟️ Torneio finalizado!";
-    atualizarInterface();
-}
-
-// ============================================
-// SISTEMA DE LOJA
+// LOJA
 // ============================================
 
 function comprarItem(itemId) {
     if (emPartida || torneioAtivo) return;
     
     if (jogo.inventario[itemId]) {
-        alert("❌ Você já possui este item!");
+        alert('❌ Você já possui este item!');
         return;
     }
     
@@ -436,32 +593,21 @@ function comprarItem(itemId) {
         jogo.dinheiro -= item.custo;
         jogo.inventario[itemId] = true;
         
-        // Aplica bônus imediato
         const esp = jogo.esportes[jogo.esporteAtual];
         esp.habilidade += item.bonus;
         
-        alert(`✅ ${item.icone} ${item.nome} adquirido com sucesso!\n+${item.bonus} de habilidade!`);
+        alert(`✅ ${item.icone} ${item.nome} adquirido! +${item.bonus} de habilidade!`);
         atualizarInterface();
     } else {
-        alert(`💰 Dinheiro insuficiente! Faltam $${item.custo - jogo.dinheiro}`);
+        alert(`💰 Faltam $${item.custo - jogo.dinheiro}`);
     }
 }
 
 // ============================================
-// NAVEGAÇÃO ENTRE ABAS
+// NAVEGAÇÃO
 // ============================================
 
 function mudarAba(idAba) {
-    if (emPartida && idAba !== 'aba-partidas') {
-        alert("⏳ Você está em uma partida! Aguarde terminar.");
-        return;
-    }
-    
-    if (torneioAtivo && idAba !== 'aba-partidas') {
-        alert("🏟️ Torneio em andamento! Acompanhe na aba Partidas.");
-        return;
-    }
-    
     document.querySelectorAll('.tela-aba').forEach(aba => {
         aba.classList.add('oculta');
     });
@@ -472,16 +618,15 @@ function mudarAba(idAba) {
     
     document.getElementById(idAba).classList.remove('oculta');
     
-    // Ativa o botão correspondente
     const botoes = document.querySelectorAll('.btn-menu');
-    const mapaAbas = {
-        'aba-treino': 0,
-        'aba-partidas': 1,
-        'aba-loja': 2,
-        'aba-estatisticas': 3
-    };
-    if (mapaAbas[idAba] !== undefined) {
-        botoes[mapaAbas[idAba]].classList.add('ativo');
+    const mapa = { 'aba-treino': 0, 'aba-partidas': 1, 'aba-loja': 2, 'aba-estatisticas': 3 };
+    if (mapa[idAba] !== undefined) {
+        botoes[mapa[idAba]].classList.add('ativo');
+    }
+    
+    // Se for a aba de partidas e tiver simulador ativo, atualiza
+    if (idAba === 'aba-partidas' && simuladorAtivo) {
+        atualizarSimulador(ultimaPartida || { resultado: 'aguardando', golsJogador: 0, golsRival: 0 });
     }
 }
 
@@ -490,151 +635,131 @@ function mudarAba(idAba) {
 // ============================================
 
 function atualizarInterface() {
-    let esp = jogo.esportes[jogo.esporteAtual];
+    const esp = jogo.esportes[jogo.esporteAtual];
     
     // Recursos
-    document.getElementById("dinheiro-display").innerText = `💰 Dinheiro: $${Math.floor(jogo.dinheiro)}`;
-    document.getElementById("gps-display").innerText = `📈 Ganhos: $${jogo.dinheiroPorSegundo}/s`;
-    document.getElementById("trofeus-display").innerText = `🏆 Troféus: ${jogo.trofeus}`;
-    document.getElementById("nivel-display").innerText = `⭐ Nível: ${jogo.nivel}`;
+    document.getElementById('dinheiro-display').innerText = `💰 Dinheiro: $${Math.floor(jogo.dinheiro)}`;
+    document.getElementById('gps-display').innerText = `📈 Ganhos: $${jogo.dinheiroPorSegundo}/s`;
+    document.getElementById('trofeus-display').innerText = `🏆 Troféus: ${jogo.trofeus}`;
+    document.getElementById('nivel-display').innerText = `⭐ Nível: ${jogo.nivel}`;
+    document.getElementById('partidas-display').innerText = `⚽ Partidas: ${jogo.partidasTotais}`;
     
     // Treino
-    document.getElementById("atleta-info").innerText = `${esp.nomeAtleta} (Nível ${esp.nivel})`;
-    document.getElementById("atleta-status").innerText = `Habilidade: ${esp.habilidade}`;
-    document.getElementById("btn-treinar").innerText = `Treinar ($${esp.custoTreino})`;
+    document.getElementById('atleta-info').innerText = `${esp.nomeAtleta} (Nível ${esp.nivel})`;
+    document.getElementById('atleta-status').innerText = `Habilidade: ${esp.habilidade}`;
+    document.getElementById('btn-treinar').innerText = `Treinar ($${esp.custoTreino})`;
     
     // Escalação
     for (let pos in jogo.time) {
         const jogador = jogo.time[pos];
         document.getElementById(`${pos}-nivel`).innerText = `Nv. ${jogador.nivel}`;
         document.getElementById(`${pos}-habilidade`).innerText = `Habilidade: ${jogador.habilidade}`;
-        // Atualiza botão de treino
         const btn = document.querySelector(`#jogadores-time .jogador-posicao button[onclick="treinarPosicao('${pos}')"]`);
         if (btn) btn.innerText = `Treinar ($${jogador.custo})`;
     }
     
-    // Partidas
-    document.getElementById("campeonato-atual").innerText = `(${jogo.esporteAtual.toUpperCase()})`;
-    document.getElementById("rival-nome").innerText = `Próximo Adversário: ${esp.rivalNome}`;
-    document.getElementById("rival-status").innerText = `Poder do Rival: ${esp.rivalHabilidade}`;
+    // Esportes
+    document.getElementById('campeonato-atual').innerText = `(${jogo.esporteAtual.toUpperCase()})`;
+    document.getElementById('rival-nome').innerText = `Próximo Adversário: ${esp.rivalNome}`;
+    document.getElementById('rival-status').innerText = `Poder do Rival: ${esp.rivalHabilidade}`;
     
-    // Campo de jogo
-    let campo = document.getElementById("campo-jogo");
-    if (campo) {
-        campo.classList.remove("quadra-futebol", "quadra-basquete");
-        campo.classList.add(`quadra-${jogo.esporteAtual}`);
-    }
-    
-    // Botões de esporte
-    if (jogo.esporteAtual === "futebol") {
-        document.getElementById("btn-esporte-futebol").style.backgroundColor = "#00b37e";
-        document.getElementById("btn-esporte-basquete").style.backgroundColor = "#29292e";
+    if (jogo.esporteAtual === 'futebol') {
+        document.getElementById('btn-esporte-futebol').style.backgroundColor = '#00b37e';
+        document.getElementById('btn-esporte-basquete').style.backgroundColor = '#29292e';
     } else {
-        document.getElementById("btn-esporte-futebol").style.backgroundColor = "#29292e";
-        document.getElementById("btn-esporte-basquete").style.backgroundColor = "#00b37e";
+        document.getElementById('btn-esporte-futebol').style.backgroundColor = '#29292e';
+        document.getElementById('btn-esporte-basquete').style.backgroundColor = '#00b37e';
     }
     
-    // Botão de basquete
     if (jogo.esportes.basquete.desbloqueado) {
-        document.getElementById("btn-esporte-basquete").innerHTML = "🏀 Basquete";
+        document.getElementById('btn-esporte-basquete').innerHTML = '🏀 Basquete';
     }
     
-    // Botões de torneio
+    // Torneios
     const configs = torneios[jogo.esporteAtual];
     for (let nivel in configs) {
         const btn = document.getElementById(`torneio-${nivel}`);
         if (btn) {
             const config = configs[nivel];
             btn.disabled = torneioAtivo || emPartida || esp.habilidade < config.nivelMin;
-            btn.innerText = `🏅 ${config.nome} (${config.partidas} partidas)`;
         }
     }
     
     // Estatísticas
-    document.getElementById("gols-total").innerText = jogo.estatisticas.gols;
-    document.getElementById("assistencias").innerText = jogo.estatisticas.assistencias;
-    document.getElementById("partidas-jogadas").innerText = jogo.estatisticas.partidas;
-    document.getElementById("vitorias-total").innerText = jogo.estatisticas.vitorias;
+    document.getElementById('gols-total').innerText = jogo.estatisticas.gols;
+    document.getElementById('assistencias').innerText = jogo.estatisticas.assistencias;
+    document.getElementById('partidas-jogadas').innerText = jogo.estatisticas.partidas;
+    document.getElementById('vitorias-total').innerText = jogo.estatisticas.vitorias;
+    document.getElementById('torneios-vencidos').innerText = jogo.estatisticas.torneiosVencidos;
     
-    let aproveitamento = jogo.estatisticas.partidas > 0 
+    const aproveitamento = jogo.estatisticas.partidas > 0 
         ? Math.round((jogo.estatisticas.vitorias / jogo.estatisticas.partidas) * 100)
         : 0;
-    document.getElementById("aproveitamento").innerText = `${aproveitamento}%`;
+    document.getElementById('aproveitamento').innerText = `${aproveitamento}%`;
     
-    let habilidadeTotal = esp.habilidade;
-    for (let pos in jogo.time) {
-        habilidadeTotal += jogo.time[pos].habilidade * 0.2;
-    }
-    if (jogo.inventario.chuteira) habilidadeTotal += 5;
-    if (jogo.inventario.bola) habilidadeTotal += 3;
-    if (jogo.inventario.uniforme) habilidadeTotal += 7;
-    if (jogo.inventario.tecnico) habilidadeTotal += 10;
-    document.getElementById("habilidade-total").innerText = Math.floor(habilidadeTotal);
+    const horas = Math.floor(jogo.tempoJogado / 3600);
+    const minutos = Math.floor((jogo.tempoJogado % 3600) / 60);
+    document.getElementById('tempo-jogado').innerText = `${horas}h ${minutos}m`;
     
-    // Loja - Atualiza botões
+    document.getElementById('habilidade-total').innerText = getHabilidadeTotal();
+    
+    // Loja
     for (let itemId in itensLoja) {
         const item = itensLoja[itemId];
-        const divItem = document.querySelector(`.item-loja:has(h4:contains('${item.nome}'))`);
-        if (divItem) {
-            const btn = divItem.querySelector('.btn-comprar');
-            if (btn) {
-                if (jogo.inventario[itemId]) {
-                    btn.innerText = '✅ Adquirido';
-                    btn.disabled = true;
-                    btn.style.background = '#29292e';
-                } else if (jogo.dinheiro < item.custo) {
-                    btn.innerText = `💰 $${item.custo}`;
-                    btn.disabled = true;
-                    btn.style.background = '#29292e';
-                } else {
-                    btn.innerText = '🛒 Comprar';
-                    btn.disabled = false;
-                    btn.style.background = '#00875f';
+        const divs = document.querySelectorAll('.item-loja');
+        divs.forEach(div => {
+            const h4 = div.querySelector('h4');
+            if (h4 && h4.textContent.includes(item.nome)) {
+                const btn = div.querySelector('.btn-comprar');
+                if (btn) {
+                    if (jogo.inventario[itemId]) {
+                        btn.innerText = '✅ Adquirido';
+                        btn.disabled = true;
+                        btn.style.background = '#29292e';
+                    } else if (jogo.dinheiro < item.custo) {
+                        btn.innerText = `💰 $${item.custo}`;
+                        btn.disabled = true;
+                        btn.style.background = '#29292e';
+                    } else {
+                        btn.innerText = '🛒 Comprar';
+                        btn.disabled = false;
+                        btn.style.background = '#00875f';
+                    }
                 }
             }
-        }
+        });
     }
 }
 
 // ============================================
-// SALVAMENTO E CARREGAMENTO
+// SALVAMENTO
 // ============================================
 
 function salvarJogo() {
     try {
-        localStorage.setItem("sportManager_save_v4", JSON.stringify(jogo));
+        localStorage.setItem('sportManager_idle_v1', JSON.stringify(jogo));
     } catch (e) {
-        console.warn("Erro ao salvar:", e);
+        console.warn('Erro ao salvar:', e);
     }
 }
 
 function carregarJogo() {
     try {
-        let savegame = localStorage.getItem("sportManager_save_v4");
-        if (savegame !== null) {
-            const dados = JSON.parse(savegame);
-            // Mantém a estrutura, mas atualiza com os dados salvos
+        const save = localStorage.getItem('sportManager_idle_v1');
+        if (save) {
+            const dados = JSON.parse(save);
             jogo = { ...jogo, ...dados };
-            // Garante que as estatísticas existam
             if (!jogo.estatisticas) {
-                jogo.estatisticas = { gols: 0, assistencias: 0, partidas: 0, vitorias: 0, golsSofridos: 0 };
+                jogo.estatisticas = { gols: 0, assistencias: 0, partidas: 0, vitorias: 0, golsSofridos: 0, torneiosVencidos: 0, finalizacoes: 0, cartoes: 0 };
             }
             if (!jogo.inventario) {
                 jogo.inventario = { chuteira: false, bola: false, uniforme: false, tecnico: false };
-            }
-            if (!jogo.time) {
-                jogo.time = {
-                    atacante: { nivel: 1, habilidade: 0, custo: 8 },
-                    meio: { nivel: 1, habilidade: 0, custo: 8 },
-                    defensor: { nivel: 1, habilidade: 0, custo: 8 },
-                    goleiro: { nivel: 1, habilidade: 0, custo: 8 }
-                };
             }
             atualizarInterface();
             return true;
         }
     } catch (e) {
-        console.warn("Erro ao carregar:", e);
+        console.warn('Erro ao carregar:', e);
     }
     return false;
 }
@@ -647,13 +772,21 @@ window.onload = function() {
     carregarJogo();
     atualizarInterface();
     
-    // Auto-salvamento a cada 10 segundos
-    setInterval(() => { salvarJogo(); }, 10000);
+    // Auto-salvamento
+    setInterval(salvarJogo, 10000);
     
-    console.log("🎮 Sport Club Manager Carregado!");
-    console.log("📊 Dicas:");
-    console.log("1. Treine seu atleta para aumentar habilidade");
-    console.log("2. Partidas dão troféus e dinheiro");
-    console.log("3. Torneios dão mais recompensas");
-    console.log("4. Compre itens na loja para bônus permanentes");
+    console.log('🎮 Sport Club Manager - Idle Mode');
+    console.log('📊 O jogo roda automaticamente em background!');
+    console.log('⚡ Partidas acontecem a cada 30 segundos');
 };
+
+// ============================================
+// FUNÇÃO PARA DEBUG (OPCIONAL)
+// ============================================
+
+// Descomente para testar rapidamente
+// setTimeout(() => {
+//     jogo.dinheiro = 1000;
+//     jogo.trofeus = 10;
+//     atualizarInterface();
+// }, 1000);
