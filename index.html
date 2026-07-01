@@ -18,19 +18,25 @@
         
         <section id="aba-treino" class="tela-aba">
             <h2>Centro de Treinamento</h2>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button onclick="selecionarEsporte('futebol')" id="btn-esporte-futebol" style="background-color: #00b37e;">Futebol</button>
+                <button onclick="selecionarEsporte('basquete')" id="btn-esporte-basquete" style="background-color: #29292e; color: #a8a8b3;">Basquete (5 🏆)</button>
+            </div>
+
             <div class="card-atleta">
-                <h3 id="atleta-info">Jogador 1 (Nível 1)</h3>
+                <h3 id="atleta-info">Jogador de Futebol (Nível 1)</h3>
                 <p id="atleta-status">Habilidade: 5</p>
                 <button onclick="treinarAtleta()" id="btn-treinar">Treinar ($10)</button>
             </div>
         </section>
 
         <section id="aba-partidas" class="tela-aba oculta">
-            <h2>Campeonato</h2>
+            <h2>Campeonato <span id="campeonato-atual">(Futebol)</span></h2>
             <p>Enfrente times rivais para ganhar troféus e grandes prêmios em dinheiro!</p>
             <div class="card-partida">
-                <h3>Próximo Adversário: Bot F.C.</h3>
-                <p>Poder do Rival: 15</p>
+                <h3 id="rival-nome">Próximo Adversário: Bot F.C.</h3>
+                <p id="rival-status">Poder do Rival: 8</p>
                 <button onclick="jogarPartida()">Iniciar Partida</button>
             </div>
             <p id="resultado-partida" class="resultado"></p>
