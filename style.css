@@ -1,0 +1,124 @@
+/* Configurações Globais (Reset) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+}
+
+body {
+    background-color: #121214;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Placar de Recursos Superior */
+.placar {
+    background-color: #1a1a1e;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    border-bottom: 2px solid #29292e;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.recurso {
+    color: #00b37e;
+}
+
+#trofeus-display {
+    color: #e1b12c;
+}
+
+/* Área de Conteúdo */
+.conteudo {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Mecânica de Alternar Abas */
+.tela-aba {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.oculta {
+    display: none !important;
+}
+
+/* Cards (Estilização dos Menus) */
+h2 {
+    font-size: 1.5rem;
+    border-left: 4px solid #00b37e;
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.card-atleta, .card-partida {
+    background-color: #202024;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #29292e;
+    text-align: center;
+}
+
+.card-atleta h3, .card-partida h3 {
+    margin-bottom: 10px;
+}
+
+.card-atleta p, .card-partida p {
+    color: #a8a8b3;
+    margin-bottom: 15px;
+}
+
+/* Botões do Jogo */
+button {
+    background-color: #00875f;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+button:active {
+    background-color: #00b37e;
+}
+
+/* Menu de Navegação Inferior (Estilo App) */
+.menu-inferior {
+    background-color: #1a1a1e;
+    display: flex;
+    border-top: 2px solid #29292e;
+}
+
+.btn-menu {
+    flex: 1;
+    background: transparent;
+    border-radius: 0;
+    padding: 15px;
+    color: #a8a8b3;
+}
+
+.btn-menu.ativo {
+    color: #ffffff;
+    border-bottom: 4px solid #00b37e;
+    background-color: #202024;
+}
+
+.resultado {
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center;
+}
