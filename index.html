@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sport Club Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="placar">
+        <div class="recurso" id="dinheiro-display">Dinheiro: $100</div>
+        <div class="recurso" id="gps-display">Ganhos: $1/s</div>
+        <div class="recurso" id="trofeus-display">Troféus: 0</div>
+    </header>
+
+    <main class="conteudo">
+        
+        <section id="aba-treino" class="tela-aba">
+            <h2>Centro de Treinamento</h2>
+            <div class="card-atleta">
+                <h3 id="atleta-info">Jogador 1 (Nível 1)</h3>
+                <p id="atleta-status">Habilidade: 5</p>
+                <button onclick="treinarAtleta()" id="btn-treinar">Treinar ($10)</button>
+            </div>
+        </section>
+
+        <section id="aba-partidas" class="tela-aba oculta">
+            <h2>Campeonato</h2>
+            <p>Enfrente times rivais para ganhar troféus e grandes prêmios em dinheiro!</p>
+            <div class="card-partida">
+                <h3>Próximo Adversário: Bot F.C.</h3>
+                <p>Poder do Rival: 15</p>
+                <button onclick="jogarPartida()">Iniciar Partida</button>
+            </div>
+            <p id="resultado-partida" class="resultado"></p>
+        </section>
+
+    </main>
+
+    <nav class="menu-inferior">
+        <button onclick="mudarAba('aba-treino')" class="btn-menu ativo">Treino</button>
+        <button onclick="mudarAba('aba-partidas')" class="btn-menu">Partidas</button>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
