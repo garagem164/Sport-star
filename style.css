@@ -39,7 +39,7 @@ body {
 .conteudo {
     flex: 1;
     padding: 20px;
-    padding-bottom: 80px; /* Ajuste: Garante que o menu não cubra o conteúdo */
+    padding-bottom: 80px;
     overflow-y: auto;
 }
 
@@ -54,7 +54,7 @@ body {
     display: none !important;
 }
 
-/* Cards (Estilização dos Menus) */
+/* Cards Genéricos */
 h2 {
     font-size: 1.5rem;
     border-left: 4px solid #00b37e;
@@ -62,7 +62,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-.card-atleta, .card-partida {
+.card-partida {
     background-color: #202024;
     padding: 20px;
     border-radius: 8px;
@@ -70,13 +70,109 @@ h2 {
     text-align: center;
 }
 
-.card-atleta h3, .card-partida h3 {
+.card-partida h3 {
     margin-bottom: 10px;
 }
 
-.card-atleta p, .card-partida p {
+.card-partida p {
     color: #a8a8b3;
     margin-bottom: 15px;
+}
+
+/* === DINÂMICA DE CAMPOS E QUADRAS === */
+.card-atleta {
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.quadra-futebol {
+    background: linear-gradient(135deg, #1e4620 25%, #153417 100%);
+}
+
+.quadra-basquete {
+    background: linear-gradient(135deg, #b35900 25%, #804000 100%);
+}
+
+/* Contêiner da Animação dos Jogadores */
+.campo-animacao {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Estilo Base dos Jogadores (Fichas Táticas) */
+.jogador {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.j1 {
+    background-color: #ff3333; /* Time Vermelho */
+    animation: moverJogador1 4s infinite alternate ease-in-out;
+}
+
+.j2 {
+    background-color: #3333ff; /* Time Azul */
+    animation: moverJogador2 4s infinite alternate ease-in-out;
+}
+
+.bola {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    animation: moverBola 4s infinite alternate ease-in-out;
+}
+
+/* ANIMAÇÃO DOS MOVIMENTOS (FÍSICA IDLE) */
+@keyframes moverJogador1 {
+    0% { top: 20px; left: 20px; }
+    50% { top: 80px; left: 50%; }
+    100% { top: 40px; left: 80%; }
+}
+
+@keyframes moverJogador2 {
+    0% { top: 90px; left: 75%; }
+    50% { top: 30px; left: 40%; }
+    100% { top: 70px; left: 15%; }
+}
+
+@keyframes moverBola {
+    0% { top: 24px; left: 28px; }
+    48% { top: 84px; left: 51%; }
+    100% { top: 74px; left: 20%; }
+}
+
+/* Textos e Botões internos */
+.card-atleta h3 {
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    font-size: 1.4rem;
+}
+
+.card-atleta p {
+    color: #ffffff;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.4);
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 20px;
 }
 
 /* Botões do Jogo */
@@ -97,13 +193,13 @@ button:active {
     background-color: #00b37e;
 }
 
-/* Menu de Navegação Inferior (Ajustado para Mobile) */
+/* Menu de Navegação Inferior */
 .menu-inferior {
     background-color: #1a1a1e;
     display: flex;
     border-top: 2px solid #29292e;
-    position: fixed; /* Ajuste: Trava o menu no rodapé */
-    bottom: 0;        /* Ajuste: Alinha no zero de baixo */
+    position: fixed;
+    bottom: 0;
     left: 0;
     width: 100%;
     z-index: 100;
