@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sport Club Manager - Deluxe</title>
+    <title>Sport Club Manager - Idle</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,6 +13,7 @@
         <div class="recurso" id="gps-display">📈 Ganhos: $1/s</div>
         <div class="recurso" id="trofeus-display">🏆 Troféus: 0</div>
         <div class="recurso" id="nivel-display">⭐ Nível: 1</div>
+        <div class="recurso" id="partidas-display">⚽ Partidas: 0</div>
     </header>
 
     <main class="conteudo">
@@ -21,7 +22,7 @@
         <section id="aba-treino" class="tela-aba">
             <h2>🏋️ Centro de Treinamento</h2>
             
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
                 <button onclick="selecionarEsporte('futebol')" id="btn-esporte-futebol" style="background-color: #00b37e;">⚽ Futebol</button>
                 <button onclick="selecionarEsporte('basquete')" id="btn-esporte-basquete" style="background-color: #29292e; color: #a8a8b3;">🏀 Basquete (5 🏆)</button>
             </div>
@@ -65,44 +66,49 @@
             </div>
         </section>
 
-        <!-- ABA PARTIDAS -->
+        <!-- ABA PARTIDAS (SIMULADOR) -->
         <section id="aba-partidas" class="tela-aba oculta">
-            <h2>🏟️ Campeonato <span id="campeonato-atual">(Futebol)</span></h2>
+            <h2>🏟️ Simulador <span id="campeonato-atual">(Futebol)</span></h2>
             
-            <!-- Botões de Torneios -->
-            <div style="display: flex; gap: 10px; margin: 10px 0;">
-                <button onclick="iniciarTorneio('amador')" class="btn-torneio" id="torneio-amador">🏅 Amador (3 partidas)</button>
-                <button onclick="iniciarTorneio('profissional')" class="btn-torneio" id="torneio-profissional">🌟 Profissional (5 partidas)</button>
-                <button onclick="iniciarTorneio('elite')" class="btn-torneio" id="torneio-elite">👑 Elite (7 partidas)</button>
+            <!-- Controles -->
+            <div style="display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap;">
+                <button onclick="alternarSimulador()" id="btn-simulador" style="background: #00875f;">
+                    ▶️ Assistir Partida
+                </button>
+                <button onclick="iniciarTorneio('amador')" class="btn-torneio" id="torneio-amador">🏅 Amador</button>
+                <button onclick="iniciarTorneio('profissional')" class="btn-torneio" id="torneio-profissional">🌟 Profissional</button>
+                <button onclick="iniciarTorneio('elite')" class="btn-torneio" id="torneio-elite">👑 Elite</button>
             </div>
             
-            <div class="card-partida">
-                <h3 id="rival-nome">Próximo Adversário: Bot F.C.</h3>
-                <p id="rival-status">Poder do Rival: 8</p>
-                <button onclick="jogarPartida()" id="btn-jogar">Iniciar Partida</button>
-            </div>
-
-            <!-- Simulador Ao Vivo -->
-            <div id="simulador-ao-vivo" class="oculta">
+            <div id="simulador-container" class="oculta">
+                <!-- Placar -->
                 <div class="placar-ao-vivo">
-                    <span id="tempo-jogo">00'</span> | 
-                    <span style="color: #3333ff;">Seu Time</span> 
-                    <span id="gols-jogador">0</span> x <span id="gols-rival">0</span> 
+                    <span id="tempo-jogo">00:00</span> | 
+                    <span style="color: #3333ff;">⚽ Seu Time</span> 
+                    <span id="gols-jogador">0</span> 
+                    <span style="color: #888;">x</span> 
+                    <span id="gols-rival">0</span> 
                     <span style="color: #ff3333;" id="nome-rival-placar">Rival</span>
                 </div>
 
-                <div id="campo-jogo" class="quadra-futebol">
-                    <div class="jogador j1" id="player-azul"></div>
-                    <div class="jogador j2" id="player-vermelho"></div>
-                    <div class="bola" id="bola-jogo"></div>
-                    <!-- Animação de Gol -->
-                    <div id="gol-efeito" class="gol-efeito oculta">⚽ GOL!</div>
+                <!-- Campo/Quadra -->
+                <div id="campo-jogo">
+                    <!-- Os jogadores e bola serão inseridos via JS -->
                 </div>
                 
-                <p id="lance-atual" class="resultado">Partida Iniciada...</p>
+                <!-- Estatísticas do jogo -->
+                <div id="estatisticas-jogo" class="estatisticas-jogo">
+                    <div><span>🏃 Posse: </span><span id="posse-bola">50%</span></div>
+                    <div><span>🎯 Finalizações: </span><span id="finalizacoes">0</span></div>
+                    <div><span>🟨 Cartões: </span><span id="cartoes">0</span></div>
+                </div>
+                
+                <p id="lance-atual" class="resultado">⏳ Aguardando início...</p>
             </div>
 
-            <p id="resultado-partida" class="resultado"></p>
+            <div id="status-partidas">
+                <p id="ultima-partida" class="resultado">📊 Nenhuma partida disputada ainda</p>
+            </div>
         </section>
 
         <!-- ABA LOJA -->
@@ -138,7 +144,7 @@
 
         <!-- ABA ESTATÍSTICAS -->
         <section id="aba-estatisticas" class="tela-aba oculta">
-            <h2>📊 Estatísticas do Jogador</h2>
+            <h2>📊 Estatísticas do Clube</h2>
             <div class="estatisticas-grid">
                 <div class="stat-card">
                     <span class="stat-icon">⚽</span>
@@ -169,6 +175,16 @@
                     <span class="stat-icon">💪</span>
                     <span class="stat-label">Habilidade Total</span>
                     <span class="stat-value" id="habilidade-total">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🏅</span>
+                    <span class="stat-label">Torneios Vencidos</span>
+                    <span class="stat-value" id="torneios-vencidos">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⏱️</span>
+                    <span class="stat-label">Tempo de Jogo</span>
+                    <span class="stat-value" id="tempo-jogado">0h</span>
                 </div>
             </div>
         </section>
