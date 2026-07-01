@@ -66,21 +66,19 @@
             </div>
         </section>
 
-        <!-- ABA PARTIDAS (SIMULADOR) -->
+        <!-- ABA PARTIDAS (SIMULADOR AUTOMÁTICO) -->
         <section id="aba-partidas" class="tela-aba oculta">
             <h2>🏟️ Simulador <span id="campeonato-atual">(Futebol)</span></h2>
             
-            <!-- Controles -->
+            <!-- Controles de Torneios -->
             <div style="display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap;">
-                <button onclick="alternarSimulador()" id="btn-simulador" style="background: #00875f;">
-                    ▶️ Assistir Partida
-                </button>
                 <button onclick="iniciarTorneio('amador')" class="btn-torneio" id="torneio-amador">🏅 Amador</button>
                 <button onclick="iniciarTorneio('profissional')" class="btn-torneio" id="torneio-profissional">🌟 Profissional</button>
                 <button onclick="iniciarTorneio('elite')" class="btn-torneio" id="torneio-elite">👑 Elite</button>
             </div>
             
-            <div id="simulador-container" class="oculta">
+            <!-- Simulador Ao Vivo (SEMPRE VISÍVEL NA ABA) -->
+            <div id="simulador-container">
                 <!-- Placar -->
                 <div class="placar-ao-vivo">
                     <span id="tempo-jogo">00:00</span> | 
@@ -101,9 +99,10 @@
                     <div><span>🏃 Posse: </span><span id="posse-bola">50%</span></div>
                     <div><span>🎯 Finalizações: </span><span id="finalizacoes">0</span></div>
                     <div><span>🟨 Cartões: </span><span id="cartoes">0</span></div>
+                    <div><span>⚡ Habilidade: </span><span id="habilidade-atual">0</span></div>
                 </div>
                 
-                <p id="lance-atual" class="resultado">⏳ Aguardando início...</p>
+                <p id="lance-atual" class="resultado">⏳ Aguardando primeira partida...</p>
             </div>
 
             <div id="status-partidas">
