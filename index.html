@@ -8,56 +8,60 @@
 </head>
 <body>
 
-    <!-- CABEÇALHO DO PLACAR DE RECURSOS -->
     <header class="placar">
         <div class="recurso" id="dinheiro-display">Dinheiro: $100</div>
         <div class="recurso" id="gps-display">Ganhos: $1/s</div>
         <div class="recurso" id="trofeus-display">Troféus: 0</div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL (ABAS) -->
     <main class="conteudo">
         
-        <!-- ABA 1: TREINAMENTO -->
         <section id="aba-treino" class="tela-aba">
             <h2>Centro de Treinamento</h2>
             
-            <!-- SELEÇÃO DE ESPORTES -->
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <button onclick="selecionarEsporte('futebol')" id="btn-esporte-futebol" style="background-color: #00b37e;">Futebol</button>
                 <button onclick="selecionarEsporte('basquete')" id="btn-esporte-basquete" style="background-color: #29292e; color: #a8a8b3;">Basquete (5 🏆)</button>
             </div>
 
-            <!-- CARD COM A QUADRA E JOGADORES ANIMADOS -->
             <div class="card-atleta">
-                <!-- Jogadores animados simulados por CSS -->
-                <div class="campo-animacao">
-                    <div class="jogador j1"></div>
-                    <div class="jogador j2"></div>
-                    <div class="bola"></div>
-                </div>
-
                 <h3 id="atleta-info">Jogador de Futebol (Nível 1)</h3>
                 <p id="atleta-status">Habilidade: 5</p>
                 <button onclick="treinarAtleta()" id="btn-treinar">Treinar ($10)</button>
             </div>
         </section>
 
-        <!-- ABA 2: PARTIDAS -->
         <section id="aba-partidas" class="tela-aba oculta">
             <h2>Campeonato <span id="campeonato-atual">(Futebol)</span></h2>
-            <p>Enfrente times rivais para ganhar troféus e grandes prêmios in dinheiro!</p>
+            
             <div class="card-partida">
                 <h3 id="rival-nome">Próximo Adversário: Bot F.C.</h3>
                 <p id="rival-status">Poder do Rival: 8</p>
-                <button onclick="jogarPartida()">Iniciar Partida</button>
+                <button onclick="jogarPartida()" id="btn-jogar">Iniciar Partida</button>
             </div>
+
+            <div id="simulador-ao-vivo" class="oculta">
+                <div class="placar-ao-vivo">
+                    <span id="tempo-jogo">00'</span> | 
+                    <span style="color: #3333ff;">Seu Time</span> 
+                    <span id="gols-jogador">0</span> x <span id="gols-rival">0</span> 
+                    <span style="color: #ff3333;" id="nome-rival-placar">Rival</span>
+                </div>
+
+                <div id="campo-jogo" class="quadra-futebol">
+                    <div class="jogador j1" id="player-azul"></div>
+                    <div class="jogador j2" id="player-vermelho"></div>
+                    <div class="bola" id="bola-jogo"></div>
+                </div>
+                
+                <p id="lance-atual" class="resultado">Partida Iniciada...</p>
+            </div>
+
             <p id="resultado-partida" class="resultado"></p>
         </section>
 
     </main>
 
-    <!-- MENU DE NAVEGAÇÃO INFERIOR -->
     <nav class="menu-inferior">
         <button onclick="mudarAba('aba-treino')" class="btn-menu ativo">Treino</button>
         <button onclick="mudarAba('aba-partidas')" class="btn-menu">Partidas</button>
