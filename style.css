@@ -39,6 +39,7 @@ body {
 .conteudo {
     flex: 1;
     padding: 20px;
+    padding-bottom: 80px; /* Ajuste: Garante que o menu não cubra o conteúdo */
     overflow-y: auto;
 }
 
@@ -96,11 +97,16 @@ button:active {
     background-color: #00b37e;
 }
 
-/* Menu de Navegação Inferior (Estilo App) */
+/* Menu de Navegação Inferior (Ajustado para Mobile) */
 .menu-inferior {
     background-color: #1a1a1e;
     display: flex;
     border-top: 2px solid #29292e;
+    position: fixed; /* Ajuste: Trava o menu no rodapé */
+    bottom: 0;        /* Ajuste: Alinha no zero de baixo */
+    left: 0;
+    width: 100%;
+    z-index: 100;
 }
 
 .btn-menu {
