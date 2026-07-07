@@ -2,30 +2,136 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚽ Bounce Arena</title>
-    <!-- style.css -->
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bounce Arena ⚽</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0a0f1a;
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            max-height: 100%;
+            background: #0a0f1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #1a2030;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        /* HUD overlay */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Menu overlay */
+        #main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Botão de reinício (apenas para fallback) */
+        #restart-btn {
+            display: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            #gameContainer {
+                touch-action: none;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- container principal -->
     <div id="game-container">
-        <!-- canvas em tela cheia -->
         <canvas id="gameCanvas"></canvas>
-
-        <!-- HUD vazio (reservado para futuros elementos) -->
-        <div id="hud" aria-hidden="true"></div>
-
-        <!-- Menu inicial vazio -->
-        <div id="main-menu" aria-hidden="true"></div>
+        <div id="hud"></div>
+        <div id="main-menu"></div>
     </div>
 
-    <!-- ===== engine scripts ===== -->
-    <script src="engine/core.js"></script>
-    <script src="engine/input.js"></script>
-    <script src="engine/renderer.js"></script>
-    <script src="engine/game.js"></script>
-    <!-- ===== script principal ===== -->
-    <script src="script.js"></script>
+    <!-- ===== CORE ===== -->
+    <script src="engine/core/config.js"></script>
+    <script src="engine/core/state.js"></script>
+    
+    <!-- ===== MATH ===== -->
+    <script src="engine/math/vector.js"></script>
+    <script src="engine/math/utils.js"></script>
+    
+    <!-- ===== UTILS ===== -->
+    <script src="engine/utils/pool.js"></script>
+    <script src="engine/utils/helpers.js"></script>
+    
+    <!-- ===== PHYSICS ===== -->
+    <script src="engine/physics/body.js"></script>
+    <script src="engine/physics/system.js"></script>
+    <script src="engine/physics/collision.js"></script>
+    
+    <!-- ===== ENTITIES ===== -->
+    <script src="engine/entities/Disc.js"></script>
+    <script src="engine/entities/Ball.js"></script>
+    
+    <!-- ===== INPUT ===== -->
+    <script src="engine/input/InputManager.js"></script>
+    
+    <!-- ===== RENDER ===== -->
+    <script src="engine/render/renderer.js"></script>
+    <script src="engine/render/field.js"></script>
+    <script src="engine/render/hud.js"></script>
+    
+    <!-- ===== AUDIO ===== -->
+    <script src="engine/audio/manager.js"></script>
+    
+    <!-- ===== PARTICLES ===== -->
+    <script src="engine/particles/system.js"></script>
+    <script src="engine/particles/types.js"></script>
+    
+    <!-- ===== GAME ===== -->
+    <script src="engine/game/Game.js"></script>
+    
+    <!-- ===== MAIN ===== -->
+    <script src="engine/core/main.js"></script>
 </body>
 </html>
