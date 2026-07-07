@@ -2,201 +2,30 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sport Club Manager - Idle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⚽ Bounce Arena</title>
+    <!-- style.css -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- container principal -->
+    <div id="game-container">
+        <!-- canvas em tela cheia -->
+        <canvas id="gameCanvas"></canvas>
 
-    <header class="placar">
-        <div class="recurso" id="dinheiro-display">💰 Dinheiro: $100</div>
-        <div class="recurso" id="gps-display">📈 Ganhos: $1/s</div>
-        <div class="recurso" id="trofeus-display">🏆 Troféus: 0</div>
-        <div class="recurso" id="nivel-display">⭐ Nível: 1</div>
-        <div class="recurso" id="partidas-display">⚽ Partidas: 0</div>
-    </header>
+        <!-- HUD vazio (reservado para futuros elementos) -->
+        <div id="hud" aria-hidden="true"></div>
 
-    <main class="conteudo">
-        
-        <!-- ABA TREINO -->
-        <section id="aba-treino" class="tela-aba">
-            <h2>🏋️ Centro de Treinamento</h2>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-                <button onclick="selecionarEsporte('futebol')" id="btn-esporte-futebol" style="background-color: #00b37e;">⚽ Futebol</button>
-                <button onclick="selecionarEsporte('basquete')" id="btn-esporte-basquete" style="background-color: #29292e; color: #a8a8b3;">🏀 Basquete (5 🏆)</button>
-            </div>
+        <!-- Menu inicial vazio -->
+        <div id="main-menu" aria-hidden="true"></div>
+    </div>
 
-            <!-- Treino do Atleta Principal -->
-            <div class="card-atleta">
-                <h3 id="atleta-info">Jogador de Futebol (Nível 1)</h3>
-                <p id="atleta-status">Habilidade: 5</p>
-                <button onclick="treinarAtleta()" id="btn-treinar">Treinar ($10)</button>
-            </div>
-
-            <!-- Sistema de Escalação -->
-            <div class="card-escalacao">
-                <h3>📋 Escalação do Time</h3>
-                <div id="jogadores-time">
-                    <div class="jogador-posicao">
-                        <span>⚡ Atacante</span>
-                        <span id="atacante-nivel">Nv. 1</span>
-                        <span id="atacante-habilidade">Habilidade: 0</span>
-                        <button onclick="treinarPosicao('atacante')" class="btn-pequeno">Treinar ($8)</button>
-                    </div>
-                    <div class="jogador-posicao">
-                        <span>🎯 Meio-campo</span>
-                        <span id="meio-nivel">Nv. 1</span>
-                        <span id="meio-habilidade">Habilidade: 0</span>
-                        <button onclick="treinarPosicao('meio')" class="btn-pequeno">Treinar ($8)</button>
-                    </div>
-                    <div class="jogador-posicao">
-                        <span>🛡️ Defensor</span>
-                        <span id="defensor-nivel">Nv. 1</span>
-                        <span id="defensor-habilidade">Habilidade: 0</span>
-                        <button onclick="treinarPosicao('defensor')" class="btn-pequeno">Treinar ($8)</button>
-                    </div>
-                    <div class="jogador-posicao">
-                        <span>🧤 Goleiro</span>
-                        <span id="goleiro-nivel">Nv. 1</span>
-                        <span id="goleiro-habilidade">Habilidade: 0</span>
-                        <button onclick="treinarPosicao('goleiro')" class="btn-pequeno">Treinar ($8)</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA PARTIDAS (SIMULADOR AUTOMÁTICO) -->
-        <section id="aba-partidas" class="tela-aba oculta">
-            <h2>🏟️ Simulador <span id="campeonato-atual">(Futebol)</span></h2>
-            
-            <!-- Controles de Torneios -->
-            <div style="display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap;">
-                <button onclick="iniciarTorneio('amador')" class="btn-torneio" id="torneio-amador">🏅 Amador</button>
-                <button onclick="iniciarTorneio('profissional')" class="btn-torneio" id="torneio-profissional">🌟 Profissional</button>
-                <button onclick="iniciarTorneio('elite')" class="btn-torneio" id="torneio-elite">👑 Elite</button>
-            </div>
-            
-            <!-- Simulador Ao Vivo (SEMPRE VISÍVEL NA ABA) -->
-            <div id="simulador-container">
-                <!-- Placar -->
-                <div class="placar-ao-vivo">
-                    <span id="tempo-jogo">00:00</span> | 
-                    <span style="color: #3333ff;">⚽ Seu Time</span> 
-                    <span id="gols-jogador">0</span> 
-                    <span style="color: #888;">x</span> 
-                    <span id="gols-rival">0</span> 
-                    <span style="color: #ff3333;" id="nome-rival-placar">Rival</span>
-                </div>
-
-                <!-- Campo/Quadra -->
-                <div id="campo-jogo">
-                    <!-- Os jogadores e bola serão inseridos via JS -->
-                </div>
-                
-                <!-- Estatísticas do jogo -->
-                <div id="estatisticas-jogo" class="estatisticas-jogo">
-                    <div><span>🏃 Posse: </span><span id="posse-bola">50%</span></div>
-                    <div><span>🎯 Finalizações: </span><span id="finalizacoes">0</span></div>
-                    <div><span>🟨 Cartões: </span><span id="cartoes">0</span></div>
-                    <div><span>⚡ Habilidade: </span><span id="habilidade-atual">0</span></div>
-                </div>
-                
-                <p id="lance-atual" class="resultado">⏳ Aguardando primeira partida...</p>
-            </div>
-
-            <div id="status-partidas">
-                <p id="ultima-partida" class="resultado">📊 Nenhuma partida disputada ainda</p>
-            </div>
-        </section>
-
-        <!-- ABA LOJA -->
-        <section id="aba-loja" class="tela-aba oculta">
-            <h2>🛒 Loja de Itens</h2>
-            <div id="loja-itens">
-                <div class="item-loja" onclick="comprarItem('chuteira')">
-                    <h4>👟 Chuteira Pro</h4>
-                    <p>Bônus: +5 Habilidade</p>
-                    <p>Custo: $150</p>
-                    <button class="btn-comprar">Comprar</button>
-                </div>
-                <div class="item-loja" onclick="comprarItem('bola')">
-                    <h4>⚽ Bola Oficial</h4>
-                    <p>Bônus: +3 Habilidade</p>
-                    <p>Custo: $200</p>
-                    <button class="btn-comprar">Comprar</button>
-                </div>
-                <div class="item-loja" onclick="comprarItem('uniforme')">
-                    <h4>👕 Kit Elite</h4>
-                    <p>Bônus: +7 Habilidade</p>
-                    <p>Custo: $300</p>
-                    <button class="btn-comprar">Comprar</button>
-                </div>
-                <div class="item-loja" onclick="comprarItem('tecnico')">
-                    <h4>📋 Técnico Experiente</h4>
-                    <p>Bônus: +10 Habilidade</p>
-                    <p>Custo: $500</p>
-                    <button class="btn-comprar">Comprar</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA ESTATÍSTICAS -->
-        <section id="aba-estatisticas" class="tela-aba oculta">
-            <h2>📊 Estatísticas do Clube</h2>
-            <div class="estatisticas-grid">
-                <div class="stat-card">
-                    <span class="stat-icon">⚽</span>
-                    <span class="stat-label">Gols Totais</span>
-                    <span class="stat-value" id="gols-total">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🎯</span>
-                    <span class="stat-label">Assistências</span>
-                    <span class="stat-value" id="assistencias">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🏆</span>
-                    <span class="stat-label">Partidas</span>
-                    <span class="stat-value" id="partidas-jogadas">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">📈</span>
-                    <span class="stat-label">Aproveitamento</span>
-                    <span class="stat-value" id="aproveitamento">0%</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🎮</span>
-                    <span class="stat-label">Vitórias</span>
-                    <span class="stat-value" id="vitorias-total">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">💪</span>
-                    <span class="stat-label">Habilidade Total</span>
-                    <span class="stat-value" id="habilidade-total">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🏅</span>
-                    <span class="stat-label">Torneios Vencidos</span>
-                    <span class="stat-value" id="torneios-vencidos">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">⏱️</span>
-                    <span class="stat-label">Tempo de Jogo</span>
-                    <span class="stat-value" id="tempo-jogado">0h</span>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <nav class="menu-inferior">
-        <button onclick="mudarAba('aba-treino')" class="btn-menu ativo">🏋️ Treino</button>
-        <button onclick="mudarAba('aba-partidas')" class="btn-menu">🏟️ Partidas</button>
-        <button onclick="mudarAba('aba-loja')" class="btn-menu">🛒 Loja</button>
-        <button onclick="mudarAba('aba-estatisticas')" class="btn-menu">📊 Stats</button>
-    </nav>
-
+    <!-- ===== engine scripts ===== -->
+    <script src="engine/core.js"></script>
+    <script src="engine/input.js"></script>
+    <script src="engine/renderer.js"></script>
+    <script src="engine/game.js"></script>
+    <!-- ===== script principal ===== -->
     <script src="script.js"></script>
 </body>
 </html>
