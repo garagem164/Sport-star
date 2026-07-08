@@ -1,137 +1,259 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bounce Arena ⚽</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #0a0f1a;
-            font-family: system-ui, -apple-system, sans-serif;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 100%;
-            max-height: 100%;
-            background: #0a0f1a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+    <title>Garagem 1:64 | O App dos Colecionadores</title>
 
-        #gameCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            background: #1a2030;
-            touch-action: none;
-            cursor: pointer;
-        }
+    <meta name="description"
+        content="Organize sua coleção de miniaturas 1:64 de maneira simples, bonita e moderna.">
 
-        /* HUD overlay */
-        #hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
+    <link rel="stylesheet" href="style.css">
 
-        /* Menu overlay */
-        #main-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 20;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
 
-        /* Botão de reinício (apenas para fallback) */
-        #restart-btn {
-            display: none;
-        }
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
 
-        /* Responsivo */
-        @media (max-width: 480px) {
-            #gameContainer {
-                touch-action: none;
-            }
-        }
-    </style>
 </head>
-<body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="hud"></div>
-        <div id="main-menu"></div>
-    </div>
 
-    <!-- ===== CORE ===== -->
-    <script src="engine/core/config.js"></script>
-    <script src="engine/core/state.js"></script>
-    
-    <!-- ===== MATH ===== -->
-    <script src="engine/math/vector.js"></script>
-    <script src="engine/math/utils.js"></script>
-    
-    <!-- ===== UTILS ===== -->
-    <script src="engine/utils/pool.js"></script>
-    <script src="engine/utils/helpers.js"></script>
-    
-    <!-- ===== PHYSICS ===== -->
-    <script src="engine/physics/body.js"></script>
-    <script src="engine/physics/system.js"></script>
-    <script src="engine/physics/collision.js"></script>
-    
-    <!-- ===== ENTITIES ===== -->
-    <script src="engine/entities/Disc.js"></script>
-    <script src="engine/entities/Ball.js"></script>
-    
-    <!-- ===== INPUT ===== -->
-    <script src="engine/input/InputManager.js"></script>
-    
-    <!-- ===== RENDER ===== -->
-    <script src="engine/render/renderer.js"></script>
-    <script src="engine/render/field.js"></script>
-    <script src="engine/render/hud.js"></script>
-    
-    <!-- ===== AUDIO ===== -->
-    <script src="engine/audio/manager.js"></script>
-    
-    <!-- ===== PARTICLES ===== -->
-    <script src="engine/particles/system.js"></script>
-    <script src="engine/particles/types.js"></script>
-    
-    <!-- ===== GAME ===== -->
-    <script src="engine/game/Game.js"></script>
-    
-    <!-- ===== MAIN ===== -->
-    <script src="engine/core/main.js"></script>
+<body>
+
+    <div class="background"></div>
+
+    <header>
+
+        <nav>
+
+            <div class="logo">
+
+                🚗 Garagem <span>1:64</span>
+
+            </div>
+
+            <a class="btn-nav"
+                href="https://da.gd/Garagem1_6">
+
+                Baixar App
+
+            </a>
+
+        </nav>
+
+    </header>
+
+    <main>
+
+        <section class="hero">
+
+            <div class="hero-text">
+
+                <h1>
+
+                    Sua coleção merece uma garagem de verdade.
+
+                </h1>
+
+                <p>
+
+                    O aplicativo perfeito para organizar, catalogar e compartilhar
+                    suas miniaturas 1:64.
+
+                </p>
+
+                <div class="buttons">
+
+                    <a href="https://da.gd/Garagem1_6"
+                        class="btn">
+
+                        Conhecer o App
+
+                    </a>
+
+                    <a href="#recursos"
+                        class="btn-outline">
+
+                        Ver Recursos
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="hero-phone">
+
+                <img src="1000272984.jpg">
+
+            </div>
+
+        </section>
+
+        <section class="stats">
+
+            <div class="stat">
+
+                <h2>100%</h2>
+
+                <p>Feito para Colecionadores</p>
+
+            </div>
+
+            <div class="stat">
+
+                <h2>∞</h2>
+
+                <p>Miniaturas cadastradas</p>
+
+            </div>
+
+            <div class="stat">
+
+                <h2>★★★★★</h2>
+
+                <p>Experiência Premium</p>
+
+            </div>
+
+        </section>
+
+        <section id="recursos">
+
+            <h2>
+
+                Tudo o que um colecionador precisa
+
+            </h2>
+
+            <div class="cards">
+
+                <div class="card">
+
+                    📦
+
+                    <h3>Organização</h3>
+
+                    <p>
+
+                        Cadastre toda sua coleção rapidamente.
+
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    🔍
+
+                    <h3>Pesquisa</h3>
+
+                    <p>
+
+                        Encontre qualquer miniatura em segundos.
+
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    ❤️
+
+                    <h3>Favoritos</h3>
+
+                    <p>
+
+                        Destaque suas miniaturas preferidas.
+
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    📸
+
+                    <h3>Fotos</h3>
+
+                    <p>
+
+                        Salve imagens incríveis da coleção.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="gallery">
+
+            <h2>
+
+                Veja o aplicativo
+
+            </h2>
+
+            <div class="gallery-grid">
+
+                <img src="1000272984.jpg">
+
+                <img src="1000272985.jpg">
+
+                <img src="1000272986.jpg">
+
+                <img src="1000272987.jpg">
+
+            </div>
+
+        </section>
+
+        <section class="cta">
+
+            <h2>
+
+                Comece agora mesmo.
+
+            </h2>
+
+            <p>
+
+                Organize sua coleção em poucos minutos.
+
+            </p>
+
+            <a href="https://da.gd/Garagem1_6"
+                class="btn">
+
+                Conhecer o App
+
+            </a>
+
+        </section>
+
+    </main>
+
+    <footer>
+
+        <h3>Garagem 1:64</h3>
+
+        <p>
+
+            Desenvolvido para apaixonados por miniaturas.
+
+        </p>
+
+    </footer>
+
+    <script src="script.js"></script>
+
 </body>
+
 </html>
