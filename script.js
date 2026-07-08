@@ -395,3 +395,24 @@ font-size:30px;
 }
 
 }
+// FAQ
+
+document.querySelectorAll(".faq-item button").forEach(botao=>{
+
+botao.onclick=()=>{
+
+const conteudo=botao.nextElementSibling;
+
+const aberto=conteudo.style.display==="block";
+
+document.querySelectorAll(".faq-item div").forEach(div=>{
+
+div.style.display="none";
+
+});
+
+conteudo.style.display=aberto?"none":"block";
+
+}
+
+});
