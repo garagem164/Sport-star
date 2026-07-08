@@ -1,405 +1,397 @@
-// script.js — Ponto de entrada principal do jogo
-// Inicialização, loop principal, delta time, FPS, resize e módulos
-(function() {
-    'use strict';
+/* ============================
+   RECURSOS
+============================ */
 
-    // ============================================================
-    // 1. CONFIGURAÇÕES GLOBAIS
-    // ============================================================
-    const CONFIG = {
-        targetFPS: 60,
-        maxDeltaTime: 0.05, // 50ms (evita saltos grandes)
-        debug: true, // ativa logs de performance
-    };
+#recursos{
 
-    // ============================================================
-    // 2. ESTADO DO JOGO
-    // ============================================================
-    const GameState = {
-        isRunning: false,
-        isPaused: false,
-        frameCount: 0,
-        fps: 0,
-        deltaTime: 0,
-        elapsedTime: 0,
-        lastTimestamp: 0,
-        fpsCounter: 0,
-        fpsTimer: 0,
-        animationId: null,
-    };
+    max-width:1200px;
 
-    // ============================================================
-    // 3. REFERÊNCIAS DOM
-    // ============================================================
-    const canvas = document.getElementById('gameCanvas');
-    const container = document.getElementById('game-container');
-    let ctx = null;
+    margin:auto;
 
-    // ============================================================
-    // 4. INICIALIZAÇÃO DOS MÓDULOS
-    // ============================================================
-    function initModules() {
-        console.log('[Script] Inicializando módulos da engine...');
+    padding:100px 30px;
 
-        // Verifica se os módulos existem
-        const modules = ['Core', 'Input', 'Renderer', 'Game'];
-        let allLoaded = true;
+}
 
-        modules.forEach(name => {
-            if (typeof window[name] === 'undefined') {
-                console.warn(`[Script] Módulo ${name} não encontrado.`);
-                allLoaded = false;
-            } else {
-                console.log(`[Script] Módulo ${name} carregado.`);
-            }
-        });
+#recursos h2{
 
-        if (!allLoaded) {
-            console.warn('[Script] Alguns módulos não foram carregados. O jogo pode não funcionar corretamente.');
-        }
+    text-align:center;
 
-        // Inicializa módulos (se já não foram inicializados automaticamente)
-        try {
-            if (typeof Renderer !== 'undefined' && Renderer.init) {
-                Renderer.init();
-            }
-            if (typeof Input !== 'undefined' && Input.init) {
-                Input.init();
-            }
-            if (typeof Core !== 'undefined' && Core.init) {
-                Core.init();
-            }
-            if (typeof Game !== 'undefined' && Game.init) {
-                Game.init();
-            }
-            console.log('[Script] Módulos inicializados com sucesso.');
-        } catch (error) {
-            console.error('[Script] Erro ao inicializar módulos:', error);
-        }
+    font-size:48px;
+
+    margin-bottom:70px;
+
+}
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+    gap:30px;
+
+}
+
+.card{
+
+    background:rgba(255,255,255,.05);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:24px;
+
+    padding:40px 30px;
+
+    text-align:center;
+
+    transition:.35s;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.card::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:150%;
+
+    height:4px;
+
+    background:#FFD000;
+
+    top:0;
+
+    left:-25%;
+
+}
+
+.card:hover{
+
+    transform:translateY(-12px);
+
+    box-shadow:0 25px 60px rgba(255,208,0,.18);
+
+}
+
+.card h3{
+
+    margin:18px 0;
+
+    font-size:24px;
+
+}
+
+.card p{
+
+    color:#bfbfbf;
+
+    line-height:1.7;
+
+    font-size:16px;
+
+}
+
+/* ============================
+   GALERIA
+============================ */
+
+.gallery{
+
+    padding:100px 30px;
+
+    max-width:1300px;
+
+    margin:auto;
+
+}
+
+.gallery h2{
+
+    text-align:center;
+
+    font-size:48px;
+
+    margin-bottom:60px;
+
+}
+
+.gallery-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+    gap:30px;
+
+}
+
+.gallery-grid img{
+
+    width:100%;
+
+    border-radius:24px;
+
+    cursor:pointer;
+
+    transition:.45s;
+
+    box-shadow:0 10px 40px rgba(0,0,0,.45);
+
+}
+
+.gallery-grid img:hover{
+
+    transform:scale(1.06);
+
+    box-shadow:0 25px 70px rgba(255,208,0,.30);
+
+}
+
+/* ============================
+   CTA
+============================ */
+
+.cta{
+
+    margin:120px auto;
+
+    max-width:1100px;
+
+    padding:90px 40px;
+
+    border-radius:35px;
+
+    text-align:center;
+
+    background:linear-gradient(135deg,#FFD000,#ffb300);
+
+    color:#111;
+
+}
+
+.cta h2{
+
+    font-size:52px;
+
+    margin-bottom:20px;
+
+}
+
+.cta p{
+
+    font-size:20px;
+
+    margin-bottom:40px;
+
+}
+
+.cta .btn{
+
+    background:#111;
+
+    color:#FFD000;
+
+}
+
+.cta .btn:hover{
+
+    background:#000;
+
+}
+
+/* ============================
+   RODAPÉ
+============================ */
+
+footer{
+
+    text-align:center;
+
+    padding:60px 20px;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+footer h3{
+
+    color:#FFD000;
+
+    font-size:30px;
+
+    margin-bottom:10px;
+
+}
+
+footer p{
+
+    color:#9d9d9d;
+
+}
+
+/* ============================
+   ANIMAÇÕES
+============================ */
+
+@keyframes subir{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(50px);
+
     }
 
-    // ============================================================
-    // 5. CONFIGURAÇÃO DO CANVAS
-    // ============================================================
-    function setupCanvas() {
-        if (!canvas) {
-            console.error('[Script] Canvas não encontrado!');
-            return false;
-        }
+    to{
 
-        ctx = canvas.getContext('2d');
-        if (!ctx) {
-            console.error('[Script] Não foi possível obter o contexto 2D do canvas!');
-            return false;
-        }
+        opacity:1;
 
-        // Configurações iniciais do contexto
-        ctx.imageSmoothingEnabled = false;
-        ctx.imageSmoothingQuality = 'high';
+        transform:translateY(0);
 
-        console.log('[Script] Canvas configurado.');
-        return true;
     }
 
-    // ============================================================
-    // 6. REDIMENSIONAMENTO AUTOMÁTICO
-    // ============================================================
-    function handleResize() {
-        if (!canvas || !container) return;
+}
 
-        const rect = container.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
+.hero,
+.stats,
+#recursos,
+.gallery,
+.cta{
 
-        // Ajusta o tamanho do canvas para corresponder ao container
-        if (canvas.width !== width || canvas.height !== height) {
-            canvas.width = width;
-            canvas.height = height;
+    animation:subir .9s ease;
 
-            // Atualiza o renderizador se disponível
-            if (typeof Renderer !== 'undefined' && Renderer._resize) {
-                Renderer._resize();
-            }
+}
 
-            console.log(`[Script] Canvas redimensionado: ${width}x${height}`);
-        }
-    }
+/* ============================
+   RESPONSIVO
+============================ */
 
-    // ============================================================
-    // 7. LOOP PRINCIPAL (requestAnimationFrame + Delta Time)
-    // ============================================================
-    function gameLoop(timestamp) {
-        if (!GameState.isRunning) return;
+@media(max-width:980px){
 
-        // --- Cálculo do Delta Time ---
-        if (GameState.lastTimestamp === 0) {
-            GameState.lastTimestamp = timestamp;
-        }
+.hero{
 
-        let deltaTime = (timestamp - GameState.lastTimestamp) / 1000; // em segundos
-        GameState.lastTimestamp = timestamp;
+flex-direction:column;
 
-        // Limita o deltaTime máximo para evitar saltos
-        if (deltaTime > CONFIG.maxDeltaTime) {
-            deltaTime = CONFIG.maxDeltaTime;
-        }
+text-align:center;
 
-        // Se o jogo estiver pausado, não atualiza a lógica
-        if (!GameState.isPaused) {
-            GameState.deltaTime = deltaTime;
-            GameState.elapsedTime += deltaTime;
-            GameState.frameCount++;
+padding-top:160px;
 
-            // --- Atualização (Update) ---
-            update(deltaTime);
+}
 
-            // --- Renderização (Render) ---
-            render();
-        }
+.hero h1{
 
-        // --- Cálculo de FPS ---
-        GameState.fpsCounter++;
-        GameState.fpsTimer += deltaTime;
-        if (GameState.fpsTimer >= 1.0) {
-            GameState.fps = GameState.fpsCounter;
-            GameState.fpsCounter = 0;
-            GameState.fpsTimer = 0;
+font-size:46px;
 
-            if (CONFIG.debug) {
-                console.log(`[FPS] ${GameState.fps} | Delta: ${(deltaTime * 1000).toFixed(2)}ms`);
-            }
-        }
+}
 
-        // --- Próximo frame ---
-        GameState.animationId = requestAnimationFrame(gameLoop);
-    }
+.hero p{
 
-    // ============================================================
-    // 8. UPDATE (lógica do jogo)
-    // ============================================================
-    function update(deltaTime) {
-        // Atualiza o Core se disponível
-        if (typeof Core !== 'undefined' && Core._update) {
-            Core._update(deltaTime);
-        }
+font-size:18px;
 
-        // Atualiza o Game se disponível
-        if (typeof Game !== 'undefined' && Game.update) {
-            Game.update(deltaTime);
-        }
+}
 
-        // Aqui entra a lógica personalizada do jogo (futuramente)
-        // Exemplo: atualizar posições, colisões, IA, etc.
-    }
+.hero-phone img{
 
-    // ============================================================
-    // 9. RENDER (desenho na tela)
-    // ============================================================
-    function render() {
-        if (!ctx || !canvas) return;
+width:260px;
 
-        // Limpa o canvas com a cor de fundo
-        ctx.fillStyle = '#1e2633';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-        // Renderiza via Core se disponível
-        if (typeof Core !== 'undefined' && Core._render) {
-            Core._render();
-        }
+.stats{
 
-        // Renderiza via Game se disponível
-        if (typeof Game !== 'undefined' && Game.render) {
-            Game.render(ctx, canvas.width, canvas.height);
-        } else {
-            // Fallback: desenha uma mensagem padrão
-            renderDefault(ctx, canvas.width, canvas.height);
-        }
+grid-template-columns:1fr;
 
-        // Renderiza overlay de debug se ativo
-        if (CONFIG.debug) {
-            renderDebug(ctx, canvas.width, canvas.height);
-        }
-    }
+}
 
-    // ============================================================
-    // 10. RENDER FALLBACK (caso o módulo Game não esteja disponível)
-    // ============================================================
-    function renderDefault(ctx, width, height) {
-        ctx.save();
+.buttons{
 
-        // Fundo gradiente
-        const gradient = ctx.createRadialGradient(
-            width / 2, height / 2, 0,
-            width / 2, height / 2, Math.max(width, height) * 0.6
-        );
-        gradient.addColorStop(0, '#2a3344');
-        gradient.addColorStop(1, '#1a1f2a');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
+display:flex;
 
-        // Texto central
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+flex-direction:column;
 
-        // Título
-        ctx.fillStyle = '#88c0ff';
-        ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
-        ctx.fillText('⚽ Bounce Arena', width / 2, height / 2 - 40);
+gap:18px;
 
-        // Subtítulo
-        ctx.fillStyle = '#a0b8d0';
-        ctx.font = '16px system-ui, -apple-system, sans-serif';
-        ctx.fillText('Jogo em desenvolvimento', width / 2, height / 2 + 20);
+align-items:center;
 
-        // Status
-        ctx.fillStyle = '#6a7f99';
-        ctx.font = '13px system-ui, -apple-system, sans-serif';
-        const status = GameState.isPaused ? '⏸ PAUSADO' : '▶ RODANDO';
-        ctx.fillText(`Status: ${status}`, width / 2, height / 2 + 60);
+}
 
-        // FPS
-        ctx.fillStyle = '#4a5f79';
-        ctx.font = '12px monospace';
-        ctx.fillText(`FPS: ${GameState.fps}`, width / 2, height / 2 + 90);
+.btn-outline{
 
-        ctx.restore();
-    }
+margin-left:0;
 
-    // ============================================================
-    // 11. RENDER DEBUG (informações técnicas)
-    // ============================================================
-    function renderDebug(ctx, width, height) {
-        ctx.save();
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(10, 10, 200, 70);
-        ctx.fillStyle = '#88c0ff';
-        ctx.font = '11px monospace';
-        ctx.fillText(`FPS: ${GameState.fps}`, 16, 16);
-        ctx.fillText(`Frame: ${GameState.frameCount}`, 16, 32);
-        ctx.fillText(`Delta: ${(GameState.deltaTime * 1000).toFixed(2)}ms`, 16, 48);
-        ctx.fillText(`Tempo: ${GameState.elapsedTime.toFixed(1)}s`, 16, 64);
-        ctx.restore();
-    }
+}
 
-    // ============================================================
-    // 12. CONTROLE DE PAUSE (via tecla P ou evento)
-    // ============================================================
-    function togglePause() {
-        GameState.isPaused = !GameState.isPaused;
-        console.log(`[Script] Jogo ${GameState.isPaused ? 'pausado' : 'retomado'}`);
-        return GameState.isPaused;
-    }
+#recursos h2,
+.gallery h2,
+.cta h2{
 
-    // ============================================================
-    // 13. INICIALIZAÇÃO PRINCIPAL
-    // ============================================================
-    function init() {
-        console.log('[Script] Iniciando jogo...');
+font-size:34px;
 
-        // 1. Configura o canvas
-        if (!setupCanvas()) {
-            console.error('[Script] Falha ao configurar o canvas. Abortando.');
-            return;
-        }
+}
 
-        // 2. Inicializa os módulos
-        initModules();
+nav{
 
-        // 3. Configura o redimensionamento
-        handleResize();
+padding:15px 20px;
 
-        // 4. Registra eventos
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(handleResize, 300);
-        });
+}
 
-        // 5. Tecla P para pause (debug)
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'p' || e.key === 'P') {
-                togglePause();
-                e.preventDefault();
-            }
-            // Tecla R para reset (se disponível)
-            if (e.key === 'r' || e.key === 'R') {
-                if (typeof Game !== 'undefined' && Game.reset) {
-                    Game.reset();
-                    console.log('[Script] Jogo resetado via tecla R');
-                }
-                e.preventDefault();
-            }
-        });
+.logo{
 
-        // 6. Inicia o loop do jogo
-        GameState.isRunning = true;
-        GameState.isPaused = false;
-        GameState.lastTimestamp = 0;
-        GameState.frameCount = 0;
-        GameState.fps = 0;
-        GameState.elapsedTime = 0;
+font-size:24px;
 
-        // Inicia o Core se disponível
-        if (typeof Core !== 'undefined' && Core.start) {
-            Core.start();
-        }
+}
 
-        // Inicia o loop principal
-        GameState.animationId = requestAnimationFrame(gameLoop);
+.btn-nav{
 
-        console.log('[Script] Jogo inicializado com sucesso!');
-        console.log(`[Script] Canvas: ${canvas.width}x${canvas.height}`);
-        console.log(`[Script] Target FPS: ${CONFIG.targetFPS}`);
-        console.log('[Script] Pressione P para pausar, R para resetar (debug)');
-    }
+padding:12px 24px;
 
-    // ============================================================
-    // 14. LIMPEZA (para hot-reload ou recarregamento)
-    // ============================================================
-    function cleanup() {
-        GameState.isRunning = false;
-        if (GameState.animationId) {
-            cancelAnimationFrame(GameState.animationId);
-            GameState.animationId = null;
-        }
-        window.removeEventListener('resize', handleResize);
-        console.log('[Script] Cleanup realizado.');
-    }
+}
 
-    // ============================================================
-    // 15. EXPORTA FUNÇÕES GLOBAIS (para debug e console)
-    // ============================================================
-    window.__game = {
-        state: GameState,
-        config: CONFIG,
-        togglePause: togglePause,
-        cleanup: cleanup,
-        resize: handleResize,
-        canvas: canvas,
-        ctx: ctx,
-    };
+}
 
-    // ============================================================
-    // 16. INICIA O JOGO QUANDO O DOM ESTIVER PRONTO
-    // ============================================================
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        // Se o DOM já estiver carregado, inicia imediatamente
-        init();
-    }
+@media(max-width:600px){
 
-    // ============================================================
-    // 17. PREVENÇÃO DE COMPORTAMENTOS PADRÃO (toque, scroll)
-    // ============================================================
-    document.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-    }, { passive: false });
+.hero h1{
 
-    document.addEventListener('gesturestart', (e) => {
-        e.preventDefault();
-    }, { passive: false });
+font-size:36px;
 
-    console.log('[Script] script.js carregado e pronto.');
-})();
+}
+
+.hero p{
+
+font-size:16px;
+
+}
+
+.card{
+
+padding:30px 20px;
+
+}
+
+.gallery-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.cta{
+
+padding:60px 25px;
+
+}
+
+.cta h2{
+
+font-size:30px;
+
+}
+
+}
