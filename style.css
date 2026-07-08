@@ -1,353 +1,288 @@
-/* ============================================================
-   style.css — Tema escuro moderno | Layout responsivo
-   Estrutura preparada para animações e futuras expansões
-   ============================================================ */
+/* ============================
+   GARAGEM 1:64
+   STYLE.CSS
+============================ */
 
-/* ---------- VARIÁVEIS GLOBAIS (Tema escuro) ---------- */
-:root {
-    /* Cores principais */
-    --color-bg-primary: #0b0e14;
-    --color-bg-secondary: #1a1f2a;
-    --color-bg-canvas: #1e2633;
-    --color-surface: #252e3f;
-    --color-surface-hover: #2f3a4f;
-
-    /* Tipografia */
-    --color-text-primary: #e8edf5;
-    --color-text-secondary: #a0b8d0;
-    --color-text-muted: #6a7f99;
-
-    /* Destaques (futuros elementos de UI) */
-    --color-accent: #88c0ff;
-    --color-accent-hover: #6aaae0;
-    --color-success: #6fcf97;
-    --color-warning: #f2c94a;
-    --color-danger: #eb5757;
-
-    /* Sombras e efeitos */
-    --shadow-base: 0 8px 32px rgba(0, 0, 0, 0.6);
-    --shadow-glow: 0 0 40px rgba(136, 192, 255, 0.08);
-    --border-radius: 12px;
-
-    /* Transições (preparado para animações) */
-    --transition-fast: 0.2s ease;
-    --transition-medium: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --transition-slow: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-
-    /* Espaçamentos */
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    --spacing-xxl: 48px;
-
-    /* Tipografia base */
-    --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    --font-size-base: 16px;
-    --font-size-sm: 14px;
-    --font-size-lg: 20px;
-    --font-size-xl: 28px;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-bold: 700;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-/* ---------- RESET CSS COMPLETO ---------- */
-*,
-*::before,
-*::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    border: 0;
-    outline: 0;
-    font: inherit;
-    font-size: 100%;
-    vertical-align: baseline;
-    background: transparent;
+html{
+    scroll-behavior:smooth;
 }
 
-html {
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
-    scroll-behavior: smooth;
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    background:#070707;
+
+    color:white;
+
+    overflow-x:hidden;
+
 }
 
-body {
-    width: 100%;
-    min-height: 100vh;
-    min-height: 100dvh; /* Para navegadores móveis modernos */
-    overflow: hidden;
-    background: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.6;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    touch-action: none;
-    user-select: none;
+/* Fundo */
+
+.background{
+
+    position:fixed;
+
+    inset:0;
+
+    background:
+
+    radial-gradient(circle at top,#ffd00022,transparent 35%),
+
+    radial-gradient(circle at bottom,#ff990011,transparent 40%),
+
+    #070707;
+
+    z-index:-2;
+
 }
 
-/* Elementos de bloco */
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-main,
-menu,
-nav,
-section,
-summary {
-    display: block;
+/* Barra */
+
+header{
+
+    position:fixed;
+
+    width:100%;
+
+    top:0;
+
+    left:0;
+
+    backdrop-filter:blur(18px);
+
+    background:rgba(0,0,0,.35);
+
+    border-bottom:1px solid rgba(255,255,255,.05);
+
+    z-index:1000;
+
 }
 
-/* Listas */
-ul,
-ol {
-    list-style: none;
+nav{
+
+    max-width:1200px;
+
+    margin:auto;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 30px;
+
 }
 
-/* Links */
-a {
-    text-decoration: none;
-    color: inherit;
+.logo{
+
+    font-size:30px;
+
+    font-weight:800;
+
 }
 
-/* Imagens e mídia */
-img,
-picture,
-video,
-canvas,
-svg {
-    display: block;
-    max-width: 100%;
-    height: auto;
+.logo span{
+
+    color:#FFD000;
+
 }
 
-/* Formulários (futuro) */
-button,
-input,
-select,
-textarea {
-    font: inherit;
-    color: inherit;
-    background: none;
-    appearance: none;
-    -webkit-appearance: none;
+/* Botões */
+
+.btn,
+
+.btn-nav{
+
+    background:#FFD000;
+
+    color:#000;
+
+    padding:16px 34px;
+
+    border-radius:60px;
+
+    text-decoration:none;
+
+    font-weight:700;
+
+    transition:.35s;
+
+    display:inline-block;
+
 }
 
-button {
-    cursor: pointer;
+.btn:hover,
+
+.btn-nav:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 15px 40px rgba(255,208,0,.35);
+
 }
 
-/* Tabelas */
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+.btn-outline{
+
+    margin-left:15px;
+
+    border:2px solid #FFD000;
+
+    color:#FFD000;
+
+    padding:14px 32px;
+
+    border-radius:60px;
+
+    text-decoration:none;
+
+    transition:.3s;
+
 }
 
-/* ---------- LAYOUT PRINCIPAL ---------- */
-#game-container {
-    position: relative;
-    width: 100vw;
-    width: 100dvw;
-    height: 100vh;
-    height: 100dvh;
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0 auto;
-    background: var(--color-bg-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    isolation: isolate;
-    /* Preparado para futuras animações de fundo */
-    transition: background var(--transition-slow);
+.btn-outline:hover{
+
+    background:#FFD000;
+
+    color:#000;
+
 }
 
-/* ---------- CANVAS (centralizado e responsivo) ---------- */
-#gameCanvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: var(--color-bg-canvas);
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
-    touch-action: none;
-    cursor: none;
-    /* Sombra suave para profundidade */
-    box-shadow: var(--shadow-base), var(--shadow-glow);
-    /* Transição preparada para animações de fade/zoom */
-    transition: opacity var(--transition-medium), transform var(--transition-medium);
-    will-change: transform, opacity;
+/* Hero */
+
+.hero{
+
+    min-height:100vh;
+
+    max-width:1200px;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:60px;
+
+    padding:130px 30px;
+
 }
 
-/* ---------- OVERLAYS (HUD / MENU) ---------- */
-#hud,
-#main-menu {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* Permite interagir com o canvas através dos overlays */
-    z-index: 10;
-    overflow: hidden;
-    /* Preparado para futuras animações de entrada/saída */
-    transition: opacity var(--transition-medium), transform var(--transition-medium);
+.hero-text{
+
+    flex:1;
+
 }
 
-#main-menu {
-    z-index: 20;
-    pointer-events: none;
-    background: transparent;
+.hero h1{
+
+    font-size:68px;
+
+    line-height:1.05;
+
+    margin-bottom:25px;
+
 }
 
-/* Quando o menu estiver ativo, futuramente usaremos uma classe .active */
-#main-menu.active {
-    pointer-events: auto;
-    background: rgba(11, 14, 20, 0.72);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+.hero p{
+
+    color:#c7c7c7;
+
+    font-size:20px;
+
+    line-height:1.8;
+
+    margin-bottom:45px;
+
 }
 
-/* ---------- RESPONSIVIDADE (ajustes finos) ---------- */
+.hero-phone{
 
-/* Telas muito pequenas (smartphones em modo retrato) */
-@media (max-width: 480px) and (orientation: portrait) {
-    :root {
-        --font-size-base: 14px;
-    }
+    flex:1;
 
-    #gameCanvas {
-        /* Pequeno padding para não encostar nas bordas */
-        padding: 4px;
-    }
+    display:flex;
+
+    justify-content:center;
+
 }
 
-/* Telas médias (tablets) */
-@media (min-width: 481px) and (max-width: 1024px) {
-    #gameCanvas {
-        padding: 8px;
-    }
+.hero-phone img{
+
+    width:330px;
+
+    border-radius:35px;
+
+    box-shadow:
+
+    0 0 70px rgba(255,208,0,.20);
+
+    transition:.4s;
+
 }
 
-/* Telas grandes (desktop) */
-@media (min-width: 1025px) {
-    #gameCanvas {
-        padding: 12px;
-        /* Máximo de tamanho para não distorcer em monitores muito largos */
-        max-width: 1600px;
-        max-height: 1000px;
-        align-self: center;
-    }
+.hero-phone img:hover{
 
-    #game-container {
-        background: radial-gradient(ellipse at center, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
-    }
+    transform:scale(1.04) rotate(-2deg);
+
 }
 
-/* Ajuste para orientação paisagem em dispositivos móveis */
-@media (orientation: landscape) and (max-height: 500px) {
-    #gameCanvas {
-        padding: 4px;
-        max-height: 96vh;
-    }
+/* Estatísticas */
+
+.stats{
+
+    max-width:1200px;
+
+    margin:auto;
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:30px;
+
+    padding:80px 30px;
+
 }
 
-/* Ajuste para telas muito altas (modo retrato) */
-@media (orientation: portrait) and (min-height: 800px) {
-    #gameCanvas {
-        padding: 16px;
-    }
+.stat{
+
+    background:rgba(255,255,255,.05);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:24px;
+
+    text-align:center;
+
+    padding:40px;
+
 }
 
-/* ---------- PREPARADO PARA ANIMAÇÕES FUTURAS ---------- */
+.stat h2{
 
-/* Classe utilitária para fade-in */
-.fade-in {
-    animation: fadeIn var(--transition-medium) forwards;
+    color:#FFD000;
+
+    font-size:46px;
+
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
+.stat p{
 
-/* Classe utilitária para slide-up (ex: menu) */
-.slide-up {
-    animation: slideUp var(--transition-medium) forwards;
-}
+    color:#bbb;
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+    margin-top:10px;
 
-/* Pulse sutil para elementos de destaque (futuro) */
-@keyframes pulse {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.6;
-    }
-}
-
-/* ---------- SCROLLBAR (opcional, mas elegante) ---------- */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--color-bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--color-surface);
-    border-radius: 8px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-surface-hover);
-}
-
-/* ---------- FOCUS VISIBLE (acessibilidade) ---------- */
-:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-}
-
-/* ---------- MEDIA QUERY PARA PREFERÊNCIA DE REDUÇÃO DE MOVIMENTO ---------- */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
 }
